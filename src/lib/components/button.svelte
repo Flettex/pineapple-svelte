@@ -2,7 +2,7 @@
   export const enabled: boolean = true;
 </script>
 
-<div class="flex justify-center items-center content-center">
+<!-- <div class="flex justify-center items-center content-center"> -->
 <button
   on:click
   on:focus
@@ -14,7 +14,7 @@
 >
   <slot />
 </button>
-</div>
+<!-- </div> -->
 
 <style>
   button {

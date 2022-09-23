@@ -6,7 +6,7 @@
 
   onMount(() => {
     Array.from(parent.children).forEach((child, index) => {
-      child.children[0].addEventListener("click", () => {
+      child.addEventListener("click", () => {
         focusIndex = index;
       });
     });
@@ -15,9 +15,9 @@
   $: {
     Array.from(parent?.children ?? []).forEach((child, index) => {
       if (index === focusIndex) {
-        child.children[0].classList.remove("button-group-not-focused");
+        child.classList.remove("button-group-not-focused");
       } else {
-        child.children[0].classList.add("button-group-not-focused");
+        child.classList.add("button-group-not-focused");
       }
     });
   }
