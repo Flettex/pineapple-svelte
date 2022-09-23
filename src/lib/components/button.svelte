@@ -2,6 +2,7 @@
   export const enabled: boolean = true;
 </script>
 
+<div class="flex justify-center items-center content-center">
 <button
   on:click
   on:focus
@@ -9,10 +10,11 @@
   on:mouseenter
   on:mouseleave
   {...$$restProps}
-  class={`${enabled ? "enabled" : "disabled"} ${$$restProps.class}`}
+  class="{$$restProps.class ?? ""} {enabled ? "enabled" : "disabled"}"
 >
   <slot />
 </button>
+</div>
 
 <style>
   button {

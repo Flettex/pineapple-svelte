@@ -1,9 +1,6 @@
 <script lang="ts">
   import Button from "$lib/components/button.svelte";
-  import CheckBox from "$lib/components/checkBox.svelte";
-
-  let val = true;
-  $: console.log("val", val)
+  import ButtonGroup from "$lib/components/buttonGroup.svelte";
 </script>
 
 <h1 class="text-2xl">
@@ -19,13 +16,26 @@
 <a href="/logout" class="link">Don't logout bro alts aren't allowed</a>
 
 <div>
-  <Button
-    on:click={() => {
-      console.log("clicked");
-    }}
-  >
-    test
-  </Button>
-
-  <CheckBox bind:checked={val} />
+  <ButtonGroup>
+    <Button
+      on:click={() => {
+        console.log("clicked 1");
+      }}>test 1</Button
+    >
+    <Button
+      on:click={() => {
+        console.log("clicked 2");
+      }}>test 2</Button
+    >
+    <Button
+      on:click={() => {
+        console.log("clicked 3");
+      }}>test 3</Button
+    >
+    <Button
+      on:click={() => {
+        console.log("clicked 4");
+      }}>test 4</Button
+    >
+  </ButtonGroup>
 </div>
