@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  let focusIndex: number;
+  export let focusIndex: number = 0;
   let parent: HTMLDivElement;
 
   onMount(() => {
@@ -37,12 +37,11 @@
     width: fit-content;
     height: fit-content;
   }
+
   .button-group-not-focused {
     background-color: transparent !important;
     border: 1px solid transparent !important;
-    border-inline-start: 1px solid lightgray !important;
     border-radius: 0 !important;
-
     box-shadow: 0 0 1px #ffffff !important;
   }
 
@@ -50,5 +49,9 @@
     background-color: rgb(246, 246, 246);
     border: 1px solid lightgray;
     border-radius: 5px;
+  }
+  .button-group > button,
+  .button-group-not-focused {
+    border-inline-start: 1px solid transparent !important;
   }
 </style>
