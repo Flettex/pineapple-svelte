@@ -1,6 +1,8 @@
 <script lang="ts">
   import Button from "$lib/components/button.svelte";
-  import ButtonGroup from "$lib/components/buttonGroup.svelte";
+  import * as Modals from "$lib/components/modal";
+
+let isOpen = false;
 </script>
 
 <h1 class="text-2xl">
@@ -16,26 +18,22 @@
 <a href="/logout" class="link">Don't logout bro alts aren't allowed</a>
 
 <div>
-  <ButtonGroup>
-    <Button
-      on:click={() => {
-        console.log("clicked 1");
-      }}>test 1</Button
-    >
-    <Button
-      on:click={() => {
-        console.log("clicked 2");
-      }}>test 2</Button
-    >
-    <Button
-      on:click={() => {
-        console.log("clicked 3");
-      }}>test 3</Button
-    >
-    <Button
-      on:click={() => {
-        console.log("clicked 4");
-      }}>test 4</Button
-    >
-  </ButtonGroup>
+  <Button on:click={() => (isOpen = true)}>Open Dialog</Button>
 </div>
+
+<Modals.Modal bind:isOpen>
+  <Modals.ModalTitle>Title</Modals.ModalTitle>
+
+  <Modals.ModalBody>
+    Lorem ipsum dolor sit amet consectetur adipisicing elit. Commodi, magni
+    alias ab neque ut illo tempore ratione vel animi enim labore obcaecati
+    quidem, accusamus voluptate, distinctio magnam quam nulla! Labore.
+  </Modals.ModalBody>
+
+  <Modals.ModalActions>
+
+    <Modals.ModalActionButton on:click={() => console.log("Clicked 1")}>Action 1</Modals.ModalActionButton>
+    <Modals.ModalActionButton on:click={() => isOpen = false} isDestructive>Close</Modals.ModalActionButton>
+
+  </Modals.ModalActions>
+</Modals.Modal>
