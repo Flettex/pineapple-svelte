@@ -1,3 +1,3 @@
-<p class="text-sm text-gray-500 mx-14 mb-5">
+<p class="text-sm text-center text-gray-500 mx-[7%] mb-5">
     <slot />
 </p>

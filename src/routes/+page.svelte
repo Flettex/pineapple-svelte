@@ -2,7 +2,7 @@
   import Button from "$lib/components/button.svelte";
   import * as Modals from "$lib/components/modal";
 
-let isOpen = false;
+  let isOpen = false;
 </script>
 
 <h1 class="text-2xl">
