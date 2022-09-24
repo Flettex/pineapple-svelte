@@ -6,7 +6,7 @@
 
 <Transition show={isOpen}>
     <Dialog on:close={() => isOpen = false}>
-      <div class="fixed z-10 inset-0 overflow-y-auto">
+      <div class="fixed z-10 inset-0 overflow-y-auto flex justify-center items-center">
         <div
           class="block items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0"
         >
@@ -31,12 +31,13 @@
             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <!-- This element is to trick the browser into centering the modal contents. -->
-            <span
-              class="inline-block align-middle sm:h-screen"
+            <div
+              class="inline-block align-middle h-[35vh] sm:h-screen"
               aria-hidden="true"
             >
-              &#8203;
-            </span>
+              <!-- Keep this empty because this has no use other than centering the modal -->
+            </div>
+
             <div
               class="inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
             >
