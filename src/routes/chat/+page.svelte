@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { decode, encode } from "cbor";
+  import { encode, decode } from 'cbor';
   import * as uuid from "uuid";
+
   interface IMessage {
     id: string;
     content: string;

@@ -1,11 +1,14 @@
 <script lang="ts">
-	import '../app.css';
+  import ToastGroup from "$lib/toast/toastGroup.svelte";
+  import "../app.css";
 </script>
 
 <main class="min-h-screen">
-	<slot />
+  <slot />
 </main>
 
+<ToastGroup />
+
 <footer>
-	<p class="text-center text-lg">Footer</p>
+  <p class="text-center text-lg">Footer</p>
 </footer>
