@@ -1,6 +1,10 @@
 <script lang="ts">
-  import { encode, decode } from 'cbor';
+  import CBOR from "@jprochazk/cbor";
   import * as uuid from "uuid";
+  const { decode } = CBOR;
+  function encode(data: any): ArrayBuffer {
+    return (CBOR.encode(data, true) as ArrayBuffer)
+  }
 
   interface IMessage {
     id: string;
@@ -109,17 +113,21 @@
   let userCache: { [key: string]: IUser | { id: bigint } } = {
     "0": SYSTEM_AUTHOR,
   };
-  let fetched = {
+  let fetched: {
+    channels: string[],
+    guilds: string[],
+    users: bigint[]
+  } = {
     channels: [],
     guilds: [],
     users: [],
   };
   let guild = MAIN_GUILD;
   let channel = MAIN_CHANNEL;
-  let logRef;
+  // let logRef;
   let statusRef;
   let textInputRef;
-  let nameRef;
+  // let nameRef;
 
   function fix(o: any): object {
     for (let [k, v] of Object.entries(o)) {
@@ -390,11 +398,11 @@
     }
   }
 
-  $: {
-    if (logRef) {
-      logRef.scrollTop += 1000;
-    }
-  }
+  // $: {
+  //   if (logRef) {
+  //     logRef.scrollTop += 1000;
+  //   }
+  // }
 
   async function connect() {
     if (socket) {
@@ -455,3 +463,138 @@
     };
   }
 </script>
+
+<div>
+  <Button on:click={connect}>
+    {socket ? "Disconnect" : "Connect"}
+  </Button>
+  <div>GUILD: {guild.name} {guild.id}</div>
+          <div>CHANNEL: {channel.name} {channel.id}</div>
+  <span>Status:</span>
+  <span bind:value={statusRef}>disconnected</span>
+</div>
+
+<!-- start converting here -->
+<div>{JSON.stringify(userCache[1])}</div>
+<Box>
+  <Tabs defaultValue={MAIN_GUILD.id} orientation="horizontal">
+    <TabsList aria-label="choose a guild">
+      <TabsTrigger value={MAIN_GUILD.id} onClick={() => [setChannel(MAIN_CHANNEL), setGuild(MAIN_GUILD)]}>Main</TabsTrigger>
+      {
+        userData && userData.guilds.map((g) => (
+          <TabsTrigger
+            key={g.id}
+            value={g.id}
+            onClick={() => [setGuild(g), setChannel(userData.guilds?.find((gd) => gd.id == g.id)?.channels?.[0] || MAIN_CHANNEL)]}
+          >
+            {g.icon ? <Image src={g.icon} alt={g.name} width={50} height={50} /> : g.name}
+          </TabsTrigger>
+        ))
+      }
+    </TabsList>
+    <TabsContent value={MAIN_GUILD.id}>
+      {logs[MAIN_CHANNEL.id]?.map((i, ind) => <div key={ind} style={{color: i.author.id === userData?.user.id ? (i.id !== "NOT_RECEIVED" ? undefined : "gray") : undefined}}>
+      {(userCache[i.author.id+""] as IUser)?.username}: {i.content} {i.created_at !== i.edited_at && "(edited)"}</div>)}
+    </TabsContent>
+    {
+      userData && userData.guilds.map((g) => (
+        <TabsContent
+          key={g.id}
+          value={g.id}
+          onClick={() => [setGuild(g), setChannel(userData.guilds?.find((gd) => gd.id == g.id)?.channels?.[0] || MAIN_CHANNEL)]}
+        >
+          <Box css={{}}>
+            <Tabs defaultValue={g.channels?.[0]?.id} orientation="horizontal">
+              <TabsList aria-label="choose a guild">
+                {
+                  userData && userData.guilds.find((g) => g.id === guild.id)?.channels?.map((c) => (
+                    <TabsTrigger
+                      value={c.id}
+                      key={c.id}
+                      onClick={() => setChannel(c)}
+                    >
+                      {c.name}
+                    </TabsTrigger>
+                  ))
+                }
+              </TabsList>
+              {
+                Object.entries(logs).map(([k, m]: [string, IMessage[]]) => (
+                  <TabsContent
+                    key={k}
+                    value={k}
+                  >
+                    {
+                      m.map((i, ind) => <div key={ind} style={{color: i.author.id === userData?.user.id ? (i.id !== "NOT_RECEIVED" ? undefined : "gray") : undefined}} onDoubleClick={() => {
+                          if (i.author.id !== BigInt(userData?.user.id as bigint) || i.channel_id == MAIN_CHANNEL.id) return;
+                          const inp = prompt("New content");
+                          if (!inp) return;
+                          socket?.send(
+                            encode({
+                              type: "MessageUpdate",
+                              data: {
+                                id: uuid.parse(i.id),
+                                content: inp,
+                                nonce: uuid.parse(i.nonce || MAIN_GUILD.id)
+                              },
+                            })
+                          );
+                        }}>{(userCache[i.author.id+""] as IUser)?.username}: {i.content} {i.created_at !== i.edited_at && "(edited)"}</div>
+                      )
+                    }
+                  </TabsContent>
+                ))
+              }
+            </Tabs>
+          </Box>
+        </TabsContent>
+      ))
+    }
+  </Tabs>
+</Box>
+<form
+  onSubmit={(ev) => {
+    ev.preventDefault();
+
+    if (!textInputRef.current || !socket) return;
+
+    const text = textInputRef.current.value;
+
+    const nonce = uuid.v4();
+
+    log({
+      id: "NOT_RECEIVED",
+      content: text,
+      created_at: Date.now(),
+      edited_at: Date.now(),
+      author: userData?.user || SYSTEM_AUTHOR,
+      channel_id: channel.id,
+      nonce
+    });
+    socket.send(
+      encode({
+        type: "MessageCreate",
+        data: {
+          content: text,
+          channel_id: channel.id,
+          nonce: uuid.parse(nonce)
+        },
+      })
+    );
+
+    textInputRef.current.value = "";
+    textInputRef.current.focus();
+  }}
+>
+  <input type="text" ref={textInputRef} />
+  <Button type="submit">Submit</Button>
+</form>
+
+<ButtonGroup>
+  <ModalGuild />
+  <ModalChannel />
+  <ModalJoinGuild />
+</ButtonGroup>
+
+<hr />
+<Table />
