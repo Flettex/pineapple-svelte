@@ -480,24 +480,30 @@
   <Tabs defaultValue={MAIN_GUILD.id} orientation="horizontal">
     <TabsList aria-label="choose a guild">
       <TabsTrigger value={MAIN_GUILD.id} onClick={() => [setChannel(MAIN_CHANNEL), setGuild(MAIN_GUILD)]}>Main</TabsTrigger>
-      {
-        userData && userData.guilds.map((g) => (
-          <TabsTrigger
-            key={g.id}
-            value={g.id}
-            onClick={() => [setGuild(g), setChannel(userData.guilds?.find((gd) => gd.id == g.id)?.channels?.[0] || MAIN_CHANNEL)]}
-          >
-            {g.icon ? <Image src={g.icon} alt={g.name} width={50} height={50} /> : g.name}
-          </TabsTrigger>
-        ))
-      }
+      {#if userData}
+        {#each userData.guilds as g (g.id)}
+            <TabsTrigger
+              key={g.id}
+              value={g.id}
+              onClick={() => [setGuild(g), setChannel(userData.guilds?.find((gd) => gd.id == g.id)?.channels?.[0] || MAIN_CHANNEL)]}
+            >
+            {#if g.icon}
+                <Image src={g.icon} alt={g.name} width={50} height={50} />
+              {:else}
+                {g.name}
+            {/if}
+            </TabsTrigger>
+        {/each}
+      {/if}
     </TabsList>
     <TabsContent value={MAIN_GUILD.id}>
-      {logs[MAIN_CHANNEL.id]?.map((i, ind) => <div key={ind} style={{color: i.author.id === userData?.user.id ? (i.id !== "NOT_RECEIVED" ? undefined : "gray") : undefined}}>
-      {(userCache[i.author.id+""] as IUser)?.username}: {i.content} {i.created_at !== i.edited_at && "(edited)"}</div>)}
+      {#each (logs[MAIN_CHANNEL.id] ?? []) as i, ind}
+      <div key={ind} style={{color: i.author.id === userData?.user.id ? (i.id !== "NOT_RECEIVED" ? undefined : "gray") : undefined}}>
+      {(userCache[i.author.id+""])?.username}: {i.content} {i.created_at !== i.edited_at && "(edited)"}</div>
+    {/each}
     </TabsContent>
-    {
-      userData && userData.guilds.map((g) => (
+    {#if userData}
+    {#each userData.guilds as g (g.id)}   
         <TabsContent
           key={g.id}
           value={g.id}
@@ -506,8 +512,8 @@
           <Box css={{}}>
             <Tabs defaultValue={g.channels?.[0]?.id} orientation="horizontal">
               <TabsList aria-label="choose a guild">
-                {
-                  userData && userData.guilds.find((g) => g.id === guild.id)?.channels?.map((c) => (
+                {#if userData}
+                {#each userData.guilds.find((g) => g.id === guild.id)?.channels as c (c.id)}
                     <TabsTrigger
                       value={c.id}
                       key={c.id}
@@ -515,18 +521,17 @@
                     >
                       {c.name}
                     </TabsTrigger>
-                  ))
-                }
+                    {/each}
+                    {/if}
               </TabsList>
-              {
-                Object.entries(logs).map(([k, m]: [string, IMessage[]]) => (
+              {#each Object.entries(logs) as [k, m]}
                   <TabsContent
                     key={k}
                     value={k}
                   >
-                    {
-                      m.map((i, ind) => <div key={ind} style={{color: i.author.id === userData?.user.id ? (i.id !== "NOT_RECEIVED" ? undefined : "gray") : undefined}} onDoubleClick={() => {
-                          if (i.author.id !== BigInt(userData?.user.id as bigint) || i.channel_id == MAIN_CHANNEL.id) return;
+                    {#each m as i, ind}
+                      <div key={ind} style={{color: i.author.id === userData?.user.id ? (i.id !== "NOT_RECEIVED" ? undefined : "gray") : undefined}} on:dblclick={() => {
+                          if (i.author.id !== BigInt(userData?.user.id) || i.channel_id == MAIN_CHANNEL.id) return;
                           const inp = prompt("New content");
                           if (!inp) return;
                           socket?.send(
@@ -539,23 +544,19 @@
                               },
                             })
                           );
-                        }}>{(userCache[i.author.id+""] as IUser)?.username}: {i.content} {i.created_at !== i.edited_at && "(edited)"}</div>
-                      )
-                    }
-                  </TabsContent>
-                ))
-              }
+                        }}>{(userCache[i.author.id+""])?.username}: {i.content} {i.created_at !== i.edited_at && "(edited)"}</div>
+                {/each}  
+              </TabsContent>
+                  {/each}
             </Tabs>
           </Box>
         </TabsContent>
-      ))
-    }
+      {/each}
+    {/if}
   </Tabs>
 </Box>
 <form
-  onSubmit={(ev) => {
-    ev.preventDefault();
-
+  on:submit|preventDefault={() => {
     if (!textInputRef.current || !socket) return;
 
     const text = textInputRef.current.value;
