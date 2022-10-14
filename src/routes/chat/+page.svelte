@@ -1,6 +1,11 @@
 <script lang="ts">
   import CBOR from "@jprochazk/cbor";
   import * as uuid from "uuid";
+
+  import Button from "$lib/components/button.svelte";
+  import { TabGroup, TabList, TabPanels, TabContent, Tab } from "$lib/components/tabs";
+  import ButtonGroup from "$lib/components/buttonGroup.svelte";
+
   const { decode } = CBOR;
   function encode(data: any): ArrayBuffer {
     return (CBOR.encode(data, true) as ArrayBuffer)
@@ -125,9 +130,14 @@
   let guild = MAIN_GUILD;
   let channel = MAIN_CHANNEL;
   // let logRef;
-  let statusRef;
-  let textInputRef;
+  let statusRef: any;
+  let textInputRef: any;
   // let nameRef;
+
+  const setGuild = (data: any) => guild = data
+
+  const setChannel = (data: any) => channel = data
+
 
   function fix(o: any): object {
     for (let [k, v] of Object.entries(o)) {
@@ -151,9 +161,10 @@
       };
 
       socket.onmessage = (ev) => {
-        // console.log(ev);
+        console.log("Ev", ev);
         const event = decode(ev.data);
-        for (let [k, v] of Object.entries(event.data)) {
+        console.log("Event", event)
+        for (let [k, v] of Object.entries(event?.data || {})) {
           if (ArrayBuffer.isView(v)) {
             event.data[k] = uuid.stringify(v as Uint8Array);
           } else if (typeof v === "object" && !Array.isArray(v) && v !== null) {
@@ -471,61 +482,62 @@
   <div>GUILD: {guild.name} {guild.id}</div>
           <div>CHANNEL: {channel.name} {channel.id}</div>
   <span>Status:</span>
-  <span bind:value={statusRef}>disconnected</span>
+  <span bind:this={statusRef}>disconnected</span>
 </div>
 
 <!-- start converting here -->
 <div>{JSON.stringify(userCache[1])}</div>
-<Box>
-  <Tabs defaultValue={MAIN_GUILD.id} orientation="horizontal">
-    <TabsList aria-label="choose a guild">
-      <TabsTrigger value={MAIN_GUILD.id} onClick={() => [setChannel(MAIN_CHANNEL), setGuild(MAIN_GUILD)]}>Main</TabsTrigger>
+  <TabGroup defaultIndex={0}>
+    <TabList aria-label="choose a guild">
+      <Tab value={MAIN_GUILD.id} onClick={() => [setChannel(MAIN_CHANNEL), setGuild(MAIN_GUILD)]}>Main</Tab>
       {#if userData}
         {#each userData.guilds as g (g.id)}
-            <TabsTrigger
+            <Tab
               key={g.id}
               value={g.id}
-              onClick={() => [setGuild(g), setChannel(userData.guilds?.find((gd) => gd.id == g.id)?.channels?.[0] || MAIN_CHANNEL)]}
+              onClick={() => [setGuild(g), setChannel(userData?.guilds?.find((gd) => gd.id == g.id)?.channels?.[0] || MAIN_CHANNEL)]}
             >
             {#if g.icon}
-                <Image src={g.icon} alt={g.name} width={50} height={50} />
+                <img src={g.icon} alt={g.name} width={50} height={50} />
               {:else}
                 {g.name}
             {/if}
-            </TabsTrigger>
+            </Tab>
         {/each}
       {/if}
-    </TabsList>
-    <TabsContent value={MAIN_GUILD.id}>
+    </TabList>
+
+    <TabPanels>
+
+    <TabContent value={MAIN_GUILD.id}>
       {#each (logs[MAIN_CHANNEL.id] ?? []) as i, ind}
       <div key={ind} style={{color: i.author.id === userData?.user.id ? (i.id !== "NOT_RECEIVED" ? undefined : "gray") : undefined}}>
       {(userCache[i.author.id+""])?.username}: {i.content} {i.created_at !== i.edited_at && "(edited)"}</div>
     {/each}
-    </TabsContent>
+    </TabContent>
     {#if userData}
     {#each userData.guilds as g (g.id)}   
-        <TabsContent
+        <TabContent
           key={g.id}
           value={g.id}
           onClick={() => [setGuild(g), setChannel(userData.guilds?.find((gd) => gd.id == g.id)?.channels?.[0] || MAIN_CHANNEL)]}
         >
-          <Box css={{}}>
-            <Tabs defaultValue={g.channels?.[0]?.id} orientation="horizontal">
-              <TabsList aria-label="choose a guild">
+            <Tab defaultValue={g.channels?.[0]?.id} orientation="horizontal">
+              <TabList aria-label="choose a guild">
                 {#if userData}
-                {#each userData.guilds.find((g) => g.id === guild.id)?.channels as c (c.id)}
-                    <TabsTrigger
+                {#each (userData.guilds.find((g) => g.id === guild.id)?.channels || []) as c (c.id)}
+                    <Tab
                       value={c.id}
                       key={c.id}
                       onClick={() => setChannel(c)}
                     >
                       {c.name}
-                    </TabsTrigger>
+              </Tab>
                     {/each}
                     {/if}
-              </TabsList>
+              </TabList>
               {#each Object.entries(logs) as [k, m]}
-                  <TabsContent
+                  <TabContent
                     key={k}
                     value={k}
                   >
@@ -546,15 +558,16 @@
                           );
                         }}>{(userCache[i.author.id+""])?.username}: {i.content} {i.created_at !== i.edited_at && "(edited)"}</div>
                 {/each}  
-              </TabsContent>
+              </TabContent>
                   {/each}
-            </Tabs>
-          </Box>
-        </TabsContent>
-      {/each}
-    {/if}
-  </Tabs>
-</Box>
+            </Tab>
+        </TabContent>
+        {/each}
+        {/if}
+
+      </TabPanels>
+    </TabGroup>
+
 <form
   on:submit|preventDefault={() => {
     if (!textInputRef.current || !socket) return;
@@ -587,15 +600,15 @@
     textInputRef.current.focus();
   }}
 >
-  <input type="text" ref={textInputRef} />
+  <input type="text" bind:this={textInputRef} />
   <Button type="submit">Submit</Button>
 </form>
 
-<ButtonGroup>
+<!-- <ButtonGroup>
   <ModalGuild />
   <ModalChannel />
   <ModalJoinGuild />
-</ButtonGroup>
+</ButtonGroup> -->
 
 <hr />
-<Table />
+<!-- <Table /> -->
