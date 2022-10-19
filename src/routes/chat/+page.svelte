@@ -1,14 +1,17 @@
 <script lang="ts">
-  import CBOR from "@jprochazk/cbor";
+  // import CBOR from "@jprochazk/cbor";
   import * as uuid from "uuid";
 
   import Button from "$lib/components/button.svelte";
-  import { TabGroup, TabList, TabPanels, TabContent, Tab } from "$lib/components/tabs";
-  import ButtonGroup from "$lib/components/buttonGroup.svelte";
+  import { Tab, TabContent, TabGroup, TabList, TabPanels } from "$lib/components/tabs";
 
-  const { decode } = CBOR;
-  function encode(data: any): ArrayBuffer {
-    return (CBOR.encode(data, true) as ArrayBuffer)
+  // const { decode } = CBOR;
+  function encode(data: any): string {
+    return JSON.stringify(data)
+  }
+
+  function decode(data: any): any {
+    return JSON.parse(data)
   }
 
   interface IMessage {
@@ -163,8 +166,11 @@
       socket.onmessage = (ev) => {
         console.log("Ev", ev);
         const event = decode(ev.data);
-        console.log("Event", event)
-        for (let [k, v] of Object.entries(event?.data || {})) {
+
+        const data = decode(ev.data);
+        console.log("data", data)
+
+        for (let [k, v] of Object.entries(event.data || {})) {
           if (ArrayBuffer.isView(v)) {
             event.data[k] = uuid.stringify(v as Uint8Array);
           } else if (typeof v === "object" && !Array.isArray(v) && v !== null) {
@@ -434,7 +440,7 @@
 
       log(sysmsg("Connecting...", channel.id));
       let websocket = new WebSocket(wsUri);
-      websocket.binaryType = "arraybuffer";
+      // websocket.binaryType = "arraybuffer";
       socket = websocket;
     }
   }
@@ -575,6 +581,7 @@
     const text = textInputRef.current.value;
 
     const nonce = uuid.v4();
+    console.log("sending message...")
 
     log({
       id: "NOT_RECEIVED",
