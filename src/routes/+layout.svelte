@@ -1,5 +1,5 @@
 <script lang="ts">
-  import ToastGroup from "$lib/toast/toastGroup.svelte";
+  import ToastGroup from "$lib/components/toast/toastGroup.svelte";
   import "../app.css";
 </script>
 

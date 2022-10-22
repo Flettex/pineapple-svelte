@@ -33,6 +33,7 @@
 	"dependencies": {
 		"@fontsource/fira-mono": "^4.5.10",
 		"@jprochazk/cbor": "^0.4.9",
+		"cbor-x": "^1.4.1",
 		"uuid": "^8.3.2"
 	}
 }

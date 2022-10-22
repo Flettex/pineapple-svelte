@@ -1,11 +1,9 @@
 <script lang="ts">
-  import CBOR from "@jprochazk/cbor";
-  import Button from "$lib/components/button.svelte";
+  import {encode, decode} from "cbor-x";
   import * as uuid from "uuid";
-  const { decode } = CBOR;
-  function encode(data: any): ArrayBuffer {
-    return (CBOR.encode(data, true) as ArrayBuffer)
-  }
+
+  import Button from "$lib/components/button.svelte";
+  import { Tab, TabContent, TabGroup, TabList, TabPanels } from "$lib/components/tabs";
 
   interface IMessage {
     id: string;
@@ -111,7 +109,7 @@
   let disconnecting: boolean = false;
   let logs: { [key: string]: IMessage[] } = {};
   let userData: IUserData | null = null;
-  let userCache: { [key: string]: IUser | { id: bigint } } = {
+  let userCache: { [key: string]: IUser } = {
     "0": SYSTEM_AUTHOR,
   };
   let fetched: {
@@ -129,6 +127,11 @@
   let statusRef: HTMLSpanElement;
   let textInputRef: HTMLInputElement;
   // let nameRef;
+
+  const setGuild = (data: any) => guild = data
+
+  const setChannel = (data: any) => channel = data
+
 
   function fix(o: any): object {
     for (let [k, v] of Object.entries(o)) {
@@ -152,9 +155,10 @@
       };
 
       socket.onmessage = (ev) => {
-        // console.log(ev);
-        const event = decode(ev.data);
-        for (let [k, v] of Object.entries(event.data)) {
+        console.log("Ev", ev);
+        const event = decode(new Uint8Array(ev.data));
+
+        for (let [k, v] of Object.entries(event.data || {})) {
           if (ArrayBuffer.isView(v)) {
             event.data[k] = uuid.stringify(v as Uint8Array);
           } else if (typeof v === "object" && !Array.isArray(v) && v !== null) {
@@ -432,7 +436,7 @@
   function try_user(id: bigint) {
     if (userCache.hasOwnProperty(id + "")) return;
     if (fetched.users.includes(id)) return;
-    userCache = ((cache) => {
+    ((cache) => {
       if (
         cache.hasOwnProperty(id + "") &&
         !userCache.hasOwnProperty(id + "") &&
@@ -448,12 +452,6 @@
           })
         );
       }
-      return {
-        ...cache,
-        [id + ""]: {
-          id,
-        },
-      };
     })(userCache);
   }
 
@@ -475,91 +473,97 @@
   <span bind:this={statusRef}>disconnected</span>
 </div>
 
-<!-- start converting here -->
 <div>{JSON.stringify(userCache[1])}</div>
-<Box>
-  <Tabs defaultValue={MAIN_GUILD.id} orientation="horizontal">
-    <TabsList aria-label="choose a guild">
-      <TabsTrigger value={MAIN_GUILD.id} onClick={() => [setChannel(MAIN_CHANNEL), setGuild(MAIN_GUILD)]}>Main</TabsTrigger>
-      {#each userData.guilds as g}
-        <TabsTrigger
+  <TabGroup defaultIndex={0}>
+    <TabList aria-label="choose a guild">
+      <Tab value={MAIN_GUILD.id} onClick={() => [setChannel(MAIN_CHANNEL), setGuild(MAIN_GUILD)]}>Main</Tab>
+      {#if userData}
+        {#each userData.guilds as g (g.id)}
+            <Tab
+              key={g.id}
+              value={g.id}
+              onClick={() => [setGuild(g), setChannel(userData?.guilds?.find((gd) => gd.id == g.id)?.channels?.[0] || MAIN_CHANNEL)]}
+            >
+            {#if g.icon}
+                <img src={g.icon} alt={g.name} width={50} height={50} />
+              {:else}
+                {g.name}
+            {/if}
+            </Tab>
+        {/each}
+      {/if}
+    </TabList>
+
+    <TabPanels>
+
+    <TabContent value={MAIN_GUILD.id}>
+      {#each (logs[MAIN_CHANNEL.id] ?? []) as i}
+      <div>
+      {(userCache[i.author.id+""])?.username}: {i.content}  {i.created_at !== i.edited_at ? "(edited)" : ""}</div>
+    {/each}
+    </TabContent>
+    {#if userData}
+    {#each userData.guilds as g (g.id)}   
+        <TabContent
           key={g.id}
           value={g.id}
-          on:click={() => [setGuild(g), setChannel(userData.guilds?.find((gd) => gd.id == g.id)?.channels?.[0] || MAIN_CHANNEL)]}
+          on:click={() => [setGuild(g), setChannel(userData?.guilds?.find((gd) => gd.id == g.id)?.channels?.[0] || MAIN_CHANNEL)]}
         >
-          {#if g.icon}
-            <Image src={g.icon} alt={g.name} width={50} height={50} />
-          {:else}
-            {g.name}
-          {/if}
-        </TabsTrigger>
-      {/each}
-    </TabsList>
-    <TabsContent value={MAIN_GUILD.id}>
-      {#each logs[MAIN_CHANNEL.id] as i, ind}
-        <div key={ind} style={{color: i.author.id === userData?.user.id ? (i.id !== "NOT_RECEIVED" ? undefined : "gray") : undefined}}>
-          {userCache[i.author.id+""]?.username}: {i.content} {i.created_at !== i.edited_at && "(edited)"}
-        </div>
-      {/each}
-    </TabsContent>
-    {#each userData.guilds as g}
-        <TabsContent
-          key={g.id}
-          value={g.id}
-          on:click={() => [setGuild(g), setChannel(userData.guilds?.find((gd) => gd.id == g.id)?.channels?.[0] || MAIN_CHANNEL)]}
-        >
-          <Box>
-            <Tabs defaultValue={g.channels?.[0]?.id} orientation="horizontal">
-              <TabsList aria-label="choose a guild">
-                {#each userData.guilds.find((g) => g.id === guild.id)?.channels as c}
-                  <TabsTrigger
-                    value={c.id}
-                    key={c.id}
-                    onClick={() => setChannel(c)}
-                  >
-                    {c.name}
-                  </TabsTrigger>
-                {/each}
-              </TabsList>
+            <Tab defaultValue={g.channels?.[0]?.id} orientation="horizontal">
+              <TabList aria-label="choose a guild">
+                {#if userData}
+                {#each (userData.guilds.find((g) => g.id === guild.id)?.channels || []) as c (c.id)}
+                    <Tab
+                      value={c.id}
+                      key={c.id}
+                      onClick={() => setChannel(c)}
+                    >
+                      {c.name}
+              </Tab>
+                    {/each}
+                    {/if}
+              </TabList>
               {#each Object.entries(logs) as [k, m]}
-                  <TabsContent
+                  <TabContent
                     key={k}
                     value={k}
                   >
-                    {#each m as i, ind}
-                      <div key={ind} style={{color: i.author.id === userData?.user.id ? (i.id !== "NOT_RECEIVED" ? undefined : "gray") : undefined}} onDoubleClick={() => {
-                        if (i.author.id !== BigInt(userData?.user.id) || i.channel_id == MAIN_CHANNEL.id) return;
-                        const inp = prompt("New content");
-                        if (!inp) return;
-                        socket?.send(
-                          encode({
-                            type: "MessageUpdate",
-                            data: {
-                              id: uuid.parse(i.id),
-                              content: inp,
-                              nonce: uuid.parse(i.nonce || MAIN_GUILD.id)
-                            },
-                          })
-                        );
-                      }}>{userCache[i.author.id+""]?.username}: {i.content} {i.created_at !== i.edited_at && "(edited)"}</div>
-                    {/each}
-                  </TabsContent>
-              {/each}
-            </Tabs>
-          </Box>
-        </TabsContent>
-    {/each}
-  </Tabs>
-</Box>
+                    {#each m as i}
+                      <!-- style={{color: i.author.id === userData?.user.id ? (i.id !== "NOT_RECEIVED" ? undefined : "gray") : undefined}} -->
+                      <div on:dblclick={() => {
+                          if (i.author.id !== BigInt(userData?.user.id || 0) || i.channel_id == MAIN_CHANNEL.id) return;
+                          const inp = prompt("New content");
+                          if (!inp) return;
+                          socket?.send(
+                            encode({
+                              type: "MessageUpdate",
+                              data: {
+                                id: uuid.parse(i.id),
+                                content: inp,
+                                nonce: uuid.parse(i.nonce || MAIN_GUILD.id)
+                              },
+                            })
+                          );
+                        }}>{(userCache[i.author.id+""])?.username}: {i.content} {i.created_at !== i.edited_at ? "(edited)" : ""}</div>
+                {/each}  
+              </TabContent>
+                  {/each}
+            </Tab>
+        </TabContent>
+        {/each}
+        {/if}
+
+      </TabPanels>
+    </TabGroup>
+
 <form
-  on:submit={(ev) => {
-    ev.preventDefault();
+  on:submit|preventDefault={() => {
+    if (!textInputRef || !socket) return;
 
-    if (!textInputRef.current || !socket) return;
-
-    const text = textInputRef.current.value;
+    const text = textInputRef.value;
 
     const nonce = uuid.v4();
+    console.log("sending message...")
 
     log({
       id: "NOT_RECEIVED",
@@ -581,19 +585,19 @@
       })
     );
 
-    textInputRef.current.value = "";
-    textInputRef.current.focus();
+    textInputRef.value = "";
+    textInputRef.focus();
   }}
 >
-  <input type="text" ref={textInputRef} />
+  <input type="text" bind:this={textInputRef} />
   <Button type="submit">Submit</Button>
 </form>
 
-<ButtonGroup>
+<!-- <ButtonGroup>
   <ModalGuild />
   <ModalChannel />
   <ModalJoinGuild />
-</ButtonGroup>
+</ButtonGroup> -->
 
 <hr />
-<Table />
+<!-- <Table /> -->
