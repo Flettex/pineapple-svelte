@@ -1,72 +1,23 @@
 <script lang="ts">
-  import {encode, decode} from "cbor-x";
+  import { encode, decode } from "cbor-x";
   import * as uuid from "uuid";
 
   import Button from "$lib/components/button.svelte";
-  import { Tab, TabContent, TabGroup, TabList, TabPanels } from "$lib/components/tabs";
-
-  interface IMessage {
-    id: string;
-    content: string;
-    created_at: number;
-    edited_at: number;
-    author: IUser;
-    channel_id: string;
-    nonce?: string;
-  }
-
-  interface IChannel {
-    id: string; // uuid
-    name: string;
-    description?: string;
-    position: number;
-    created_at: number; // number
-    guild_id: string; // uuid, useless but too lazy to remove it
-  }
-
-  interface IUser {
-    id: bigint;
-    username: string;
-    profile?: string;
-    created_at: number; // time
-    description?: string;
-    is_staff: boolean;
-    is_superuser: boolean;
-  }
-
-  interface IMember {
-    id: string;
-    nick_name: string | undefined;
-    join_at: number;
-    guild_id: string;
-    user_id: bigint;
-  }
-
-  interface IGuild {
-    id: string; // uuid
-    name: string;
-    description?: string;
-    icon?: string;
-    created_at: number; // time
-    creator_id: number;
-    channels: IChannel[];
-    members: IMember[];
-  }
-
-  interface IUserData {
-    user: {
-      id: bigint;
-      username: string;
-      email: string;
-      profile?: string;
-      created_at: number; // time
-      description?: string;
-      allow_login: boolean;
-      is_staff: boolean;
-      is_superuser: boolean;
-    };
-    guilds: IGuild[];
-  }
+  import {
+    Tab,
+    TabContent,
+    TabGroup,
+    TabList,
+    TabPanels,
+  } from "$lib/components/tabs";
+  import type {
+    IGuild,
+    IChannel,
+    IUser,
+    IUserData,
+    IMessage,
+  } from "$lib/types";
+  import GuildCreateModal from "./guildCreateModal.svelte";
 
   const MAIN_GUILD: IGuild = {
     id: "5fe9d2ab-2174-4a30-8245-cc5de2563dce",
@@ -113,9 +64,9 @@
     "0": SYSTEM_AUTHOR,
   };
   let fetched: {
-    channels: string[],
-    guilds: string[],
-    users: bigint[]
+    channels: string[];
+    guilds: string[];
+    users: bigint[];
   } = {
     channels: [],
     guilds: [],
@@ -128,10 +79,9 @@
   let textInputRef: HTMLInputElement;
   // let nameRef;
 
-  const setGuild = (data: any) => guild = data
+  const setGuild = (data: any) => (guild = data);
 
-  const setChannel = (data: any) => channel = data
-
+  const setChannel = (data: any) => (channel = data);
 
   function fix(o: any): object {
     for (let [k, v] of Object.entries(o)) {
@@ -155,7 +105,6 @@
       };
 
       socket.onmessage = (ev) => {
-        console.log("Ev", ev);
         const event = decode(new Uint8Array(ev.data));
 
         for (let [k, v] of Object.entries(event.data || {})) {
@@ -169,9 +118,7 @@
             });
           }
         }
-        // console.log(event);
-        // console.log(event.data);
-        // const event = JSON.parse(ev.data);
+
         if (event.type === "MemberCreate") {
           userData = ((usrd) => {
             if (!usrd) return null;
@@ -191,7 +138,6 @@
                 ],
               };
             } else {
-              // console.log("omg!11! new??");
               newGuilds.push({
                 ...event.data.guild,
                 members: [],
@@ -286,6 +232,7 @@
             ...cache,
             [event.data.user.id + ""]: event.data.user,
           }))(userCache);
+          console.log(userData);
         } else if (event.type === "Messages") {
           logs = ((logs) => ({
             ...logs,
@@ -468,93 +415,109 @@
     {socket ? "Disconnect" : "Connect"}
   </Button>
   <div>GUILD: {guild.name} {guild.id}</div>
-          <div>CHANNEL: {channel.name} {channel.id}</div>
+  <div>CHANNEL: {channel.name} {channel.id}</div>
   <span>Status:</span>
   <span bind:this={statusRef}>disconnected</span>
 </div>
 
-<div>{JSON.stringify(userCache[1])}</div>
-  <TabGroup defaultIndex={0}>
-    <TabList aria-label="choose a guild">
-      <Tab value={MAIN_GUILD.id} onClick={() => [setChannel(MAIN_CHANNEL), setGuild(MAIN_GUILD)]}>Main</Tab>
-      {#if userData}
-        {#each userData.guilds as g (g.id)}
-            <Tab
-              key={g.id}
-              value={g.id}
-              onClick={() => [setGuild(g), setChannel(userData?.guilds?.find((gd) => gd.id == g.id)?.channels?.[0] || MAIN_CHANNEL)]}
-            >
-            {#if g.icon}
-                <img src={g.icon} alt={g.name} width={50} height={50} />
-              {:else}
-                {g.name}
-            {/if}
-            </Tab>
-        {/each}
-      {/if}
-    </TabList>
+<!-- <div>{JSON.stringify(userCache[1])}</div> -->
+<TabGroup defaultIndex={0}>
+  <TabList aria-label="choose a guild">
+    <Tab
+      value={MAIN_GUILD.id}
+      on:click={() => [setChannel(MAIN_CHANNEL), setGuild(MAIN_GUILD)]}>Main</Tab>
+    {#if userData}
+      {#each userData.guilds as g (g.id)}
+        <Tab
+          class="border border-black rounded-sm m-1"
+          on:click={() => {
+            console.log("clicked")
+            setGuild(g)
+            setChannel(
+              userData?.guilds?.find((gd) => gd.id == g.id)?.channels?.[0] ||
+                MAIN_CHANNEL
+            )
+          }}
+        >
+          {#if g.icon}
+            <img src={g.icon} alt={g.name} width={50} height={50} />
+          {:else}
+            {g.name}
+          {/if}
+        </Tab>
+      {/each}
+    {/if}
+  </TabList>
 
-    <TabPanels>
-
+  <TabPanels>
     <TabContent value={MAIN_GUILD.id}>
-      {#each (logs[MAIN_CHANNEL.id] ?? []) as i}
-      <div>
-      {(userCache[i.author.id+""])?.username}: {i.content}  {i.created_at !== i.edited_at ? "(edited)" : ""}</div>
-    {/each}
+      {#each logs[MAIN_CHANNEL.id] ?? [] as i}
+        <div>
+          {userCache[i.author.id + ""]?.username}: {i.content}
+          {i.created_at !== i.edited_at ? "(edited)" : ""}
+        </div>
+      {/each}
     </TabContent>
     {#if userData}
-    {#each userData.guilds as g (g.id)}   
+      {#each userData.guilds as g (g.id)}
         <TabContent
           key={g.id}
           value={g.id}
-          on:click={() => [setGuild(g), setChannel(userData?.guilds?.find((gd) => gd.id == g.id)?.channels?.[0] || MAIN_CHANNEL)]}
+          on:click={() => [
+            setGuild(g),
+            setChannel(
+              userData?.guilds?.find((gd) => gd.id == g.id)?.channels?.[0] ||
+                MAIN_CHANNEL
+            ),
+          ]}
         >
-            <Tab defaultValue={g.channels?.[0]?.id} orientation="horizontal">
-              <TabList aria-label="choose a guild">
-                {#if userData}
-                {#each (userData.guilds.find((g) => g.id === guild.id)?.channels || []) as c (c.id)}
-                    <Tab
-                      value={c.id}
-                      key={c.id}
-                      onClick={() => setChannel(c)}
-                    >
-                      {c.name}
-              </Tab>
-                    {/each}
-                    {/if}
-              </TabList>
-              {#each Object.entries(logs) as [k, m]}
-                  <TabContent
-                    key={k}
-                    value={k}
+          <Tab defaultValue={g.channels?.[0]?.id} orientation="horizontal">
+            <TabList aria-label="choose a guild">
+              {#if userData}
+                {#each userData.guilds.find((g) => g.id === guild.id)?.channels || [] as c (c.id)}
+                  <Tab value={c.id} key={c.id} onClick={() => setChannel(c)}>
+                    {c.name}
+                  </Tab>
+                {/each}
+              {/if}
+            </TabList>
+            {#each Object.entries(logs) as [k, m]}
+              <TabContent key={k} value={k}>
+                {#each m as i}
+                  <!-- style={{color: i.author.id === userData?.user.id ? (i.id !== "NOT_RECEIVED" ? undefined : "gray") : undefined}} -->
+                  <div
+                    on:dblclick={() => {
+                      if (
+                        i.author.id !== BigInt(userData?.user.id || 0) ||
+                        i.channel_id == MAIN_CHANNEL.id
+                      )
+                        return;
+                      const inp = prompt("New content");
+                      if (!inp) return;
+                      socket?.send(
+                        encode({
+                          type: "MessageUpdate",
+                          data: {
+                            id: uuid.parse(i.id),
+                            content: inp,
+                            nonce: uuid.parse(i.nonce || MAIN_GUILD.id),
+                          },
+                        })
+                      );
+                    }}
                   >
-                    {#each m as i}
-                      <!-- style={{color: i.author.id === userData?.user.id ? (i.id !== "NOT_RECEIVED" ? undefined : "gray") : undefined}} -->
-                      <div on:dblclick={() => {
-                          if (i.author.id !== BigInt(userData?.user.id || 0) || i.channel_id == MAIN_CHANNEL.id) return;
-                          const inp = prompt("New content");
-                          if (!inp) return;
-                          socket?.send(
-                            encode({
-                              type: "MessageUpdate",
-                              data: {
-                                id: uuid.parse(i.id),
-                                content: inp,
-                                nonce: uuid.parse(i.nonce || MAIN_GUILD.id)
-                              },
-                            })
-                          );
-                        }}>{(userCache[i.author.id+""])?.username}: {i.content} {i.created_at !== i.edited_at ? "(edited)" : ""}</div>
-                {/each}  
+                    {userCache[i.author.id + ""]?.username}: {i.content}
+                    {i.created_at !== i.edited_at ? "(edited)" : ""}
+                  </div>
+                {/each}
               </TabContent>
-                  {/each}
-            </Tab>
+            {/each}
+          </Tab>
         </TabContent>
-        {/each}
-        {/if}
-
-      </TabPanels>
-    </TabGroup>
+      {/each}
+    {/if}
+  </TabPanels>
+</TabGroup>
 
 <form
   on:submit|preventDefault={() => {
@@ -563,7 +526,7 @@
     const text = textInputRef.value;
 
     const nonce = uuid.v4();
-    console.log("sending message...")
+    console.log("sending message...");
 
     log({
       id: "NOT_RECEIVED",
@@ -572,7 +535,7 @@
       edited_at: Date.now(),
       author: userData?.user || SYSTEM_AUTHOR,
       channel_id: channel.id,
-      nonce
+      nonce,
     });
     socket.send(
       encode({
@@ -580,7 +543,7 @@
         data: {
           content: text,
           channel_id: channel.id,
-          nonce: uuid.parse(nonce)
+          nonce: uuid.parse(nonce),
         },
       })
     );
@@ -593,6 +556,7 @@
   <Button type="submit">Submit</Button>
 </form>
 
+<GuildCreateModal bind:socket={socket} bind:channel={channel} log={log} sysmsg={sysmsg} />
 <!-- <ButtonGroup>
   <ModalGuild />
   <ModalChannel />

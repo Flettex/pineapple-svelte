@@ -31,12 +31,13 @@
             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <!-- This element is to trick the browser into centering the modal contents. -->
-            <div
+            <!-- Keep this empty because this has no use other than centering the modal -->
+            <!-- Comment this out for now... -->
+            <!-- <div
               class="inline-block align-middle h-[35vh] sm:h-screen"
               aria-hidden="true"
             >
-              <!-- Keep this empty because this has no use other than centering the modal -->
-            </div>
+            </div> -->
 
             <div
               class="inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"

@@ -8,7 +8,3 @@
 </main>
 
 <ToastGroup />
-
-<footer>
-  <p class="text-center text-lg">Footer</p>
-</footer>
