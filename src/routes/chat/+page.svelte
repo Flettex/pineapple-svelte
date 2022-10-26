@@ -168,7 +168,8 @@
           })(logs);
         } else if (event.type === "MessageCreate") {
           // console.log(JSON.stringify(event.data.author), userData?.user.id);
-          if (event.data.author.id === userData?.user.id) {
+          console.log("msg create", event.data);
+          if (BigInt(event.data.author.id) === userData?.user.id) {
             logs = ((logs) => {
               // find the message with the nonce
               return {
@@ -506,7 +507,7 @@
                       );
                     }}
                   >
-                    {userCache[i.author.id + ""]?.username}: {i.content}
+                    {userCache[i.author.id + ""]?.username || i.author.id}: {i.content}
                     {i.created_at !== i.edited_at ? "(edited)" : ""}
                   </div>
                 {/each}
