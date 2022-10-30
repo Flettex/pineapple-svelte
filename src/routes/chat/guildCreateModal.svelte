@@ -6,14 +6,12 @@
     ModalActions,
     ModalTitle,
   } from "$lib/components/modal";
-  import type { IChannel } from "$lib/types";
   import { encode } from "cbor-x";
+  import {socket, selectedChannel} from "$lib/stores"
+  import { sysmsg } from "$lib/constants";
 
   let isModalOpen = false;
 
-  export let channel: IChannel;
-  export let socket: WebSocket | null;
-  export let sysmsg: Function;
   export let log: Function;
 
   let name = "";
@@ -45,13 +43,13 @@
     >
     <ModalActionButton
       on:click={() => {
-        if (!socket || !name) {
+        if (!$socket || !name) {
           isModalOpen = false;
           return;
         }
 
-        log(sysmsg("Creating guild: " + name, channel.id));
-        socket.send(
+        log(sysmsg("Creating guild: " + name, $selectedChannel.id));
+        $socket.send(
           encode({
             type: "GuildCreate",
             data: {
