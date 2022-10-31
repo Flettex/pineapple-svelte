@@ -1,5 +1,5 @@
 <script lang="ts">
-  export const enabled: boolean = true;
+  export let disabled: boolean = false;
 </script>
 
 <!-- <div class="flex justify-center items-center content-center"> -->
@@ -10,13 +10,15 @@
   on:mouseenter
   on:mouseleave
   {...$$restProps}
-  class="{$$restProps.class ?? ""} {enabled ? "enabled" : "disabled"}"
+  disabled={disabled}
+  class:enabled={!disabled}
+  class:disabled={disabled}
 >
   <slot />
 </button>
-<!-- </div> -->
 
-<style>
+<!-- </div> -->
+<style lang="postcss">
   button {
     padding-top: 0.1em;
     padding-bottom: 0.2em;
@@ -27,22 +29,22 @@
     border-radius: 5px;
   }
 
-  .enabled {
+  button.enabled {
     background-color: white;
     border: 1px solid lightgray;
     box-shadow: 0 0 0.5px lightgray;
   }
-  .enabled:active {
+  button.enabled:active {
     background-color: rgb(246, 246, 246);
     border: 1px solid gray;
   }
 
-  .disabled {
+  button.disabled {
     background-color: transparent;
     border: 1px solid transparent;
     box-shadow: 0 0 1px #ffffff;
   }
-  .disabled:active {
+  button.disabled:active {
     background-color: rgb(246, 246, 246);
     border: 1px solid lightgray;
   }
