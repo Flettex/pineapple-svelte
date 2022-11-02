@@ -3,7 +3,7 @@
   import { selectedChannel, selectedGuild, userData } from "$lib/stores";
 </script>
 
-<div>
+<div class="flex flex-col">
   <button
   class="guild-tab"
     on:click={() => [
@@ -26,7 +26,7 @@
       {#if g.icon}
         <img src={g.icon} alt={g.name} width={50} height={50} />
       {:else}
-        {g.name}
+        {g.name[0]}
       {/if}
     </button>
   {/each}
@@ -34,6 +34,6 @@
 
 <style lang="postcss">
     .guild-tab {
-        @apply border border-black rounded-sm m-1;
+        @apply border border-black rounded-md m-1;
     }
 </style>

@@ -371,7 +371,7 @@
 </script>
 
 <div class="flex gap-1">
-  <!-- <GuildSideBar /> -->
+  <GuildSideBar />
 
   <div>
     <div>
