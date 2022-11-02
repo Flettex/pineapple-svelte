@@ -2,7 +2,6 @@
     import { navigating } from '$app/stores';
   </script>
   
-  ee
   <div class="gradient-loader" class:show={$navigating !== null}></div>
   
   <style lang="postcss">
