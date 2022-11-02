@@ -64,6 +64,7 @@
       };
 
       sock.onmessage = (ev) => {
+
         const event = decode(new Uint8Array(ev.data));
 
         for (let [k, v] of Object.entries(event.data || {})) {
@@ -370,7 +371,7 @@
 </script>
 
 <div class="flex gap-1">
-  <GuildSideBar />
+  <!-- <GuildSideBar /> -->
 
   <div>
     <div>
