@@ -3,9 +3,9 @@
   import { socket, logs, userCache, userData } from "$lib/stores";
   import { encode } from "cbor-x";
   import * as uuid from "uuid";
+  import type { PageData } from "./$types"
 
-  // export let data: PageData;
-  export let data: any;
+  export let data: PageData;
   $: channelId = data.channelId as string;
   $: msgs = $logs[channelId];
 </script>
