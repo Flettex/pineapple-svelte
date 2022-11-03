@@ -1,8 +1,19 @@
 <script lang="ts">
-    import { navigating } from '$app/stores';
-  </script>
+  import { afterNavigate, beforeNavigate } from '$app/navigation';
+  let isNavigating: boolean = false;
+
+  beforeNavigate(() => {
+    isNavigating = true;
+  });
   
-  <div class="gradient-loader" class:show={$navigating !== null}></div>
+  afterNavigate(() => {
+    setTimeout(() => {
+      isNavigating = false;
+    }, 100)
+  });
+</script>
+  
+  <div class="gradient-loader" class:show={isNavigating}></div>
   
   <style lang="postcss">
     div {
