@@ -1,7 +1,9 @@
-<script>
-    import {DialogTitle} from "@rgossiaux/svelte-headlessui"
-</script>
-
-<DialogTitle class="text-xl text-center font-semibold pt-5 pb-1">
+<h1 class="modal-title">
     <slot />
-</DialogTitle>
+</h1>
+
+<style lang="postcss">
+    .modal-title {
+        @apply text-xl text-center font-semibold pt-5 pb-1;
+    }
+</style>

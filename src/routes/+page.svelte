@@ -1,5 +1,6 @@
 <script lang="ts">
   import Button from "$lib/components/button.svelte";
+
   import * as Modals from "$lib/components/modal";
   import { createToast } from "$lib/utils";
 
@@ -37,11 +38,10 @@
   </Modals.ModalBody>
 
   <Modals.ModalActions>
+    <Modals.ModalActionButton on:click={() => (isOpen = false)} isDestructive
+      >Close</Modals.ModalActionButton>
     <Modals.ModalActionButton on:click={() => console.log("Clicked 1")}
       >Action 1</Modals.ModalActionButton
-    >
-    <Modals.ModalActionButton on:click={() => (isOpen = false)} isDestructive
-      >Close</Modals.ModalActionButton
     >
   </Modals.ModalActions>
 </Modals.Modal>
