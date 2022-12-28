@@ -4,7 +4,7 @@
 </script>
 
 <div class="flex flex-col gap-1 fixed bottom-0 right-0 m-6 ">
-  {#each $toastStore as toast, index}
+  {#each $toastStore as toast, index (index)}
     <Toast currentToast={toast} {index} />
   {/each}
 </div>

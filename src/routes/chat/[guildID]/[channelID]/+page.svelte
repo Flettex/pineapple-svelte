@@ -8,7 +8,7 @@
   export let data: PageData;
   $: channelId = data.channelId as string;
   $: msgs = $logs[channelId];
-  $: console.log(msgs, $logs)
+  $: console.log("messages", msgs, $logs)
 </script>
 
 {#if channelId === MAIN_CHANNEL.id}

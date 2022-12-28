@@ -21,6 +21,8 @@
   } from "$lib/stores";
   import type { IGuild, IMessage } from "$lib/types";
   import GuildCreateModal from "./guildCreateModal.svelte";
+	import { onMount } from "svelte";
+	import { goto } from "$app/navigation";
 
   let disconnecting: boolean = false;
 
@@ -38,6 +40,18 @@
   let statusRef: HTMLSpanElement;
   let textInputRef: HTMLInputElement;
   // let nameRef;
+
+  onMount(async () => {
+    await connect();
+    selectedGuild.subscribe(({ id }) => {
+      goto(`/chat/${id}/${$selectedChannel.id}`)
+    });
+
+    selectedChannel.subscribe(({ id }) => {
+      goto(`/chat/${$selectedGuild.id}/${id}`)
+    });
+
+  });
 
   $: console.log("changed guild to", $selectedGuild);
   $: console.log("changed channel to", $selectedChannel);
@@ -78,6 +92,8 @@
             });
           }
         }
+
+        console.log(event.type, event);
 
         if (event.type === "MemberCreate") {
           userData.update((usrd) => {
@@ -128,7 +144,7 @@
           });
         } else if (event.type === "MessageCreate") {
           // console.log(JSON.stringify(event.data.author), userData?.user.id);
-          if (event.data.author.id === $userData?.user.id) {
+          if (event.data.author.id == $userData?.user.id) {
             logs.update((logs) => {
               // find the message with the nonce
               return {
@@ -330,7 +346,8 @@
 
       // await fetch("/api/samesite");
       // const proto = location.protocol.startsWith("https") ? "wss" : "ws";
-      const wsUri = "ws://localhost:8080/ws";
+      // const wsUri = "ws://localhost:8080/ws";
+      const wsUri = "ws://localhost:5173/ws";
       // const wsUri = "wss://flettex-backend.fly.dev/ws";
 
       log(sysmsg("Connecting...", $selectedGuild.id));
@@ -383,6 +400,8 @@
       <span>Status:</span>
       <span bind:this={statusRef}>disconnected</span>
     </div>
+
+    <slot />
 
     <form
       on:submit|preventDefault={() => {

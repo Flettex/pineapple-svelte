@@ -22,7 +22,7 @@
   <Button on:click={() => (isOpen = true)}>Open Dialog</Button>
   <Button
     on:click={() =>
-      createToast({ message: "Test toast 1234", delay: 1000, type: "error" })}
+      createToast({ message: "Test toast 1234", delay: 5000, type: "error" })}
     >Open Toast</Button
   >
 </div>
