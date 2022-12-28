@@ -16,7 +16,6 @@
   };
 
   onMount(() => {
-    // const _currentToast = currentToast;
     setTimeout(() => {
       toastStore.update((state) => {
         return state.filter((toast) => {
