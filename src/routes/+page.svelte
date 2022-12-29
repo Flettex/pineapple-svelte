@@ -45,3 +45,9 @@
     >
   </Modals.ModalActions>
 </Modals.Modal>
+
+<style lang="postcss">
+  .link {
+    @apply underline text-blue-600 hover:text-blue-800 visited:text-purple-600;
+  }
+</style>

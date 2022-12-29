@@ -13,7 +13,10 @@
 
 {#if channelId === MAIN_CHANNEL.id}
   {#each $logs[MAIN_CHANNEL.id] ?? [] as i}
-    <div>
+    <!-- {console.log("TEST123", i.author.id, $userData?.user.id)} -->
+    <div
+      class={i.author.id == $userData?.user.id ? (i.id !== "NOT_RECEIVED" ? "" : "gray-500") : ""}
+    >
       {$userCache[i.author.id + ""]?.username}: {i.content}
       {i.created_at !== i.edited_at ? "(edited)" : ""}
     </div>
@@ -23,7 +26,9 @@
     {#each msgs as i}
       <!-- style={{color: i.author.id === userData?.user.id ? (i.id !== "NOT_RECEIVED" ? undefined : "gray") : undefined}} -->
       <!-- svelte-ignore missing-declaration -->
+      <!-- {console.log("TEST123", i.author.id, $userData?.user.id)} -->
       <div
+        class={i.author.id == $userData?.user.id ? /* (i.id !== "NOT_RECEIVED" ? "" : "gray-500") */ "gray-500" : ""}
         on:dblclick={() => {
           if (
             i.author.id !== BigInt($userData?.user.id || 0) ||

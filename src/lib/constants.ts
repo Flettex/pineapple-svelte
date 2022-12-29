@@ -1,14 +1,5 @@
 import type { IChannel, IGuild, IMessage, IUser } from "./types";
 
-export const MAIN_GUILD: IGuild = {
-  id: "5fe9d2ab-2174-4a30-8245-cc5de2563dce",
-  name: "Main",
-  created_at: 0,
-  creator_id: -1,
-  channels: [],
-  members: [],
-};
-
 export const MAIN_CHANNEL: IChannel = {
   id: "5fe9d2ab-2174-4a30-8245-cc5de2563dce",
   name: "Main",
@@ -17,6 +8,15 @@ export const MAIN_CHANNEL: IChannel = {
   guild_id: "5fe9d2ab-2174-4a30-8245-cc5de2563dce",
 };
 
+
+export const MAIN_GUILD: IGuild = {
+  id: "5fe9d2ab-2174-4a30-8245-cc5de2563dce",
+  name: "Main",
+  created_at: 0,
+  creator_id: -1,
+  channels: [MAIN_CHANNEL],
+  members: [],
+};
 export const SYSTEM_AUTHOR: IUser = {
   id: BigInt(0),
   username: "System",

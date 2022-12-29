@@ -1,7 +1,7 @@
 <script lang="ts">
   import RouteLoading from "$lib/components/routeLoading.svelte";
-  import ToastGroup from "$lib/components/toast/toastGroup.svelte";
-  import "../app.css";
+  import SnackBarGroup from "$lib/components/snackbar/snackbarGroup.svelte";
+  import "../styles/app.scss";
 </script>
 
 <RouteLoading />
@@ -9,4 +9,4 @@
   <slot />
 </main>
 
-<ToastGroup />
+<SnackBarGroup />

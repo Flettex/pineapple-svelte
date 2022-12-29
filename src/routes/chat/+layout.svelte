@@ -1,6 +1,7 @@
 <script lang="ts">
   import Button from "$lib/components/button.svelte";
   import GuildSideBar from "./guildSideBar.svelte";
+  import ChannelSideBar from "./channelSideBar.svelte";
 
   import { decode, encode } from "cbor-x";
   import * as uuid from "uuid";
@@ -389,6 +390,7 @@
 
 <div class="flex gap-1">
   <GuildSideBar />
+  <ChannelSideBar />
 
   <div>
     <div>
