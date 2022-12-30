@@ -19,23 +19,16 @@
     socket,
     userCache,
     userData,
+    fetched
   } from "$lib/stores";
   import type { IGuild, IMessage } from "$lib/types";
   import GuildCreateModal from "./guildCreateModal.svelte";
 	import { onMount } from "svelte";
 	import { goto } from "$app/navigation";
+	import ChannelCreateModal from "./channelCreateModal.svelte";
+	import JoinGuildModal from "./joinGuildModal.svelte";
 
   let disconnecting: boolean = false;
-
-  let fetched: {
-    channels: string[];
-    guilds: string[];
-    users: bigint[];
-  } = {
-    channels: [],
-    guilds: [],
-    users: [],
-  };
 
   // let logRef;
   let statusRef: HTMLSpanElement;
@@ -56,6 +49,22 @@
 
   $: console.log("changed guild to", $selectedGuild);
   $: console.log("changed channel to", $selectedChannel);
+  $: {
+    if ($selectedChannel.id !== MAIN_CHANNEL.id) {
+      if (!$fetched.channels.includes($selectedChannel.id) && $socket) {
+        $socket.sendQueued(encode({
+          type: "MessageFetch",
+          data: {
+            channel_id: uuid.parse($selectedChannel.id)
+          }
+        }));
+        fetched.update((fetched) => ({
+          ...fetched,
+          channels: [...fetched.channels, $selectedChannel.id]
+        }));
+      }
+    }
+  }
 
   function fix(o: any): object {
     for (let [k, v] of Object.entries(o)) {
@@ -74,10 +83,6 @@
 
   socket.subscribe((sock) => {
     if (sock) {
-      sock.onopen = () => {
-        log(sysmsg("Connected", $selectedChannel.id));
-      };
-
       sock.onmessage = (ev) => {
 
         const event = decode(new Uint8Array(ev.data));
@@ -296,8 +301,8 @@
   socket.subscribe((sock) => {
     if (sock) {
       if ($selectedChannel.id == MAIN_CHANNEL.id) return;
-      if (!fetched.channels.includes($selectedChannel.id)) {
-        sock.send(
+      if (!$fetched.channels.includes($selectedChannel.id)) {
+        sock.sendQueued(
           encode({
             type: "MessageFetch",
             data: {
@@ -305,7 +310,10 @@
             },
           })
         );
-        fetched.channels.push($selectedChannel.id);
+        fetched.update((fetched) => ({
+          ...fetched,
+          channels: [...fetched.channels, $selectedChannel.id]
+        }));
       }
     }
   });
@@ -313,7 +321,7 @@
   socket.subscribe((sock) => {
     if (sock) {
       if ($selectedGuild.id == MAIN_GUILD.id) return;
-      if (!fetched.guilds.includes($selectedGuild.id)) {
+      if (!$fetched.guilds.includes($selectedGuild.id)) {
         sock?.send(
           encode({
             type: "MemberFetch",
@@ -322,7 +330,10 @@
             },
           })
         );
-        fetched.guilds.push($selectedGuild.id);
+        fetched.update((fetched) => ({
+          ...fetched,
+          guilds: [...fetched.guilds, $selectedGuild.id]
+        }));
       }
     }
   });
@@ -352,22 +363,37 @@
       // const wsUri = "wss://flettex-backend.fly.dev/ws";
 
       log(sysmsg("Connecting...", $selectedGuild.id));
-      let websocket = new WebSocket(wsUri);
+      let websocket: any = new WebSocket(wsUri);
+      let queue: (string | ArrayBufferLike | Blob | ArrayBufferView)[] = [];
       websocket.binaryType = "arraybuffer";
+      websocket.onopen = () => {
+        log(sysmsg("Connected", $selectedChannel.id));
+        queue.forEach((d) => websocket.send(d));
+      };
+      websocket.sendQueued = (data: string | ArrayBufferLike | Blob | ArrayBufferView) => {
+        if (websocket.readyState === 1) {
+          websocket.send(data);
+        } else {
+          queue.push(data);
+        }
+      }
       socket.set(websocket);
     }
   }
 
   function try_user(id: bigint) {
-    if (userCache.hasOwnProperty(id + "")) return;
-    if (fetched.users.includes(id)) return;
+    if ($userCache.hasOwnProperty(id + "")) return;
+    if ($fetched.users.includes(id)) return;
     ((cache) => {
       if (
         cache.hasOwnProperty(id + "") &&
-        !userCache.hasOwnProperty(id + "") &&
-        !fetched.users.includes(id)
+        !$userCache.hasOwnProperty(id + "") &&
+        !$fetched.users.includes(id)
       ) {
-        fetched.users.push(id);
+        fetched.update((fetched) => ({
+          ...fetched,
+          users: [...fetched.users, id]
+        }));
         $socket?.send(
           encode({
             type: "UserFetch",
@@ -443,6 +469,8 @@
     </form>
 
     <GuildCreateModal {log} />
+    <ChannelCreateModal {log} />
+    <JoinGuildModal {log} />
 
     <hr />
   </div>

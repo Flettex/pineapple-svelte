@@ -10,7 +10,11 @@ export interface IToast {
   delay?: number;
 }
 
-export const socket = writable<WebSocket | null>(null);
+interface WS extends WebSocket {
+  sendQueued: (data: string | ArrayBufferLike | Blob | ArrayBufferView) => void
+}
+
+export const socket = writable<WS | null>(null);
 
 export const toastStore = writable<IToast[]>([]);
 
@@ -25,3 +29,13 @@ export const userCache = writable<{ [key: string]: IUser }>({
 });
 
 export const logs = writable<{ [key: string]: IMessage[] }>({});
+
+export const fetched = writable<{
+  channels: string[];
+  guilds: string[];
+  users: bigint[];
+}>({
+  channels: [],
+  guilds: [],
+  users: [],
+});
