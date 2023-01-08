@@ -279,7 +279,9 @@
         }
       };
 
-      sock.onclose = () => {
+      sock.onclose = (ev) => {
+        console.log(ev.code);
+        if (ev.code === 10008) alert("Unauthorized");
         log(sysmsg("Disconnected", $selectedChannel.id));
         socket.set(null);
         disconnecting = false;
