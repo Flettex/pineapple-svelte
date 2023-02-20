@@ -1,11 +1,19 @@
 <script lang="ts">
   import { MAIN_CHANNEL, MAIN_GUILD } from "$lib/constants";
   import { selectedChannel, selectedGuild, userData } from "$lib/stores";
+	import { createToast } from "$lib/utils";
 </script>
 
-<div class="flex flex-col">
+<div class="fixed top-0 left-0 h-screen w-16 flex flex-col bg-[#E3E5E8] dark:bg-gray-900 shadow-lg">
   <button
-  class="guild-tab"
+    class="guild-tab"
+    on:click={() => createToast({ message: "Dms are not available yet", type: "info" })}
+  >Dms</button>
+
+  <hr class="guild-tab-hr">
+
+  <button
+    class="guild-tab"
     on:click={() => [
       selectedGuild.set(MAIN_GUILD),
       selectedChannel.set(MAIN_CHANNEL),
@@ -34,6 +42,18 @@
 
 <style lang="postcss">
     .guild-tab {
-        @apply border border-black rounded-md m-1;
+      @apply relative flex items-center justify-center 
+      h-12 w-12 mt-2 mb-2 mx-auto  
+    bg-white hover:bg-blue-600 dark:bg-gray-800 
+    text-black hover:text-white
+      hover:rounded-xl rounded-3xl
+      transition-all duration-300 ease-linear
+      cursor-pointer shadow-sm;
+    }
+
+    .guild-tab-hr {
+      @apply bg-gray-500 dark:bg-gray-800 
+      border border-gray-500 dark:border-gray-800 rounded-full
+      mx-4;
     }
 </style>
