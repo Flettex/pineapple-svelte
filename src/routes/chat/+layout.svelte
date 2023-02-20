@@ -44,7 +44,6 @@
     selectedChannel.subscribe(({ id }) => {
       goto(`/chat/${$selectedGuild.id}/${id}`)
     });
-
   });
 
   $: console.log("changed guild to", $selectedGuild);
@@ -214,21 +213,16 @@
             ...cache,
             [event.data.user.id + ""]: event.data.user,
           }));
-          console.log(userData);
+          console.log("USER DATA", $userData);
         } else if (event.type === "Messages") {
           logs.update((logs) => ({
             ...logs,
             [event.data.channel_id]: [
               ...(logs[event.data.channel_id] || []),
               ...event.data.messages.map((m: any) => {
-                // console.log("AUTHOR_ID:", m.author_id);
                 return {
                   id: m.id,
                   content: m.content,
-                  // content: (userData!.guilds.find((g) =>
-                  // 	g.channels.find((c) => c === event.data.channel_id) ? true : false)
-                  // 		?.members.find((mem) => mem.user_id === m.author_id)
-                  // 			?.nick_name ?? ([try_user(m.author_id), userCache[m.author_id]][1] as IUser | undefined)?.username ?? m.author_id) + ": " + m.content,
                   created_at: m.created_at,
                   edited_at: m.edited_at,
                   channel_id: m.channel_id,
@@ -274,12 +268,16 @@
             ...cache,
             [event.data.id + ""]: event.data,
           }));
+        } else if (event.type === "ErrorUnauthorized") {
+          goto("/login");
         } else {
           console.log("Unhandled event", event.type, "Data: ", event.data);
         }
       };
 
-      sock.onclose = () => {
+      sock.onclose = (ev) => {
+        console.log(ev.code);
+        if (ev.code === 10008) alert("Unauthorized");
         log(sysmsg("Disconnected", $selectedChannel.id));
         socket.set(null);
         disconnecting = false;
@@ -322,7 +320,7 @@
     if (sock) {
       if ($selectedGuild.id == MAIN_GUILD.id) return;
       if (!$fetched.guilds.includes($selectedGuild.id)) {
-        sock?.send(
+        sock.sendQueued(
           encode({
             type: "MemberFetch",
             data: {
@@ -418,7 +416,7 @@
   <GuildSideBar />
   <ChannelSideBar />
 
-  <div>
+  <div class="flex flex-col bg-gray-300 dark:bg-gray-700 m-0 h-full w-full overflow-hidden">
     <div>
       <Button on:click={connect}>
         {$socket ? "Disconnect" : "Connect"}
