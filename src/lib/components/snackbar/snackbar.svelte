@@ -41,7 +41,7 @@
   <!-- Use the built in slide transition for now -->
   <!-- We can use active to apply custom transitions-->
   <!-- {index} -->
-  {currentToast.id}
+  <!-- {currentToast.id} -->
 
   <div class="icon">
     {#if currentToast.icon}

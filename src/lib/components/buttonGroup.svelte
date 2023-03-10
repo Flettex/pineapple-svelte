@@ -16,8 +16,13 @@
     Array.from(parent?.children ?? []).forEach((child, index) => {
       if (index === focusIndex) {
         child.classList.remove("button-group-not-focused");
+        child.classList.remove("not-after-focus");
+      } else if (index === focusIndex + 1) {
+        child.classList.add("button-group-not-focused")
+        child.classList.remove("not-after-focus");
       } else {
         child.classList.add("button-group-not-focused");
+        child.classList.add("not-after-focus");
       }
     });
   }
@@ -36,6 +41,8 @@
     border-radius: 5px;
     width: fit-content;
     height: fit-content;
+    margin-top: 0.2rem;
+    margin-bottom: 0.2rem;
   }
 
   .button-group-not-focused {
@@ -45,13 +52,18 @@
     box-shadow: 0 0 1px #ffffff !important;
   }
 
-  .button-group-not-focused:active {
+  /* don't need this, the buttons has default fallback to the button styles... */
+  /* .button-group-not-focused:active {
     background-color: rgb(246, 246, 246);
     border: 1px solid lightgray;
     border-radius: 5px;
+  } */
+
+  .button-group > button:not(:first-child).not-after-focus {
+    border-inline-start: 1px solid lightgray !important;
   }
-  .button-group > button,
-  .button-group-not-focused {
+  
+  .button-group:first-child {
     border-inline-start: 1px solid transparent !important;
   }
 </style>

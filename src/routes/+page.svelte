@@ -1,5 +1,6 @@
 <script lang="ts">
   import Button from "$lib/components/button.svelte";
+	import ButtonGroup from "$lib/components/buttonGroup.svelte";
 
   import * as Modals from "$lib/components/modal";
   import { createToast } from "$lib/utils";
@@ -27,6 +28,12 @@
     >Open Toast</Button
   >
 </div>
+
+<ButtonGroup>
+  <Button>1</Button>
+  <Button>2</Button>
+  <Button>3</Button>
+</ButtonGroup>
 
 <Modals.Modal bind:isOpen>
   <Modals.ModalTitle>Title</Modals.ModalTitle>

@@ -269,6 +269,7 @@
             [event.data.id + ""]: event.data,
           }));
         } else if (event.type === "ErrorUnauthorized") {
+          // should no longer be dispatched after hotfix in backend
           goto("/login");
         } else {
           console.log("Unhandled event", event.type, "Data: ", event.data);
@@ -277,7 +278,10 @@
 
       sock.onclose = (ev) => {
         console.log(ev.code);
-        if (ev.code === 10008) alert("Unauthorized");
+        if (ev.code === 4000) {
+          alert("Unauthorized");
+          goto("/login");
+        }
         log(sysmsg("Disconnected", $selectedChannel.id));
         socket.set(null);
         disconnecting = false;

@@ -10,6 +10,7 @@
     import { socket, selectedChannel } from "$lib/stores"
     import { sysmsg } from "$lib/constants";
     import * as uuid from "uuid";
+	import { createToast } from "$lib/utils";
   
     let isModalOpen = false;
   
@@ -19,6 +20,15 @@
     let description = "";
     let position = 0;
     let guild_id = "";
+    let channel_type = 0;
+
+    $: {
+      // alert(channel_type + typeof channel_type);
+      if (channel_type === 1) {
+        createToast({ message: "I told you, DM channels not allowed!", delay: 5000, type: "error" })
+        channel_type = 0;
+      }
+    }
   </script>
   
   <Button on:click={() => (isModalOpen = true)}>Trigger Channel</Button>
@@ -42,6 +52,21 @@
       <div class="p-1">
         Guild Id <input type="text" bind:value={guild_id} />
       </div>
+
+      <div class="p-1">
+        Channel type:
+        <select bind:value={channel_type}>
+          <option value={0}>
+            Text Channel
+          </option>
+          <option value={1}>
+            DM Channel (Disallowed)
+          </option>
+          <option value={2}>
+            Category Channel
+          </option>
+        </select>
+      </div>
     </form>
     <ModalActions>
       <ModalActionButton on:click={() => (isModalOpen = false)} isDestructive
@@ -62,7 +87,8 @@
                         name,
                         description,
                         position,
-                        guild_id: uuid.parse(guild_id)
+                        guild_id: uuid.parse(guild_id),
+                        channel_type
                     },
                 })
             );
