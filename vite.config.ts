@@ -12,12 +12,12 @@ const config: UserConfig = {
 	server: {
 		proxy: {
 			'/api': {
-				target: 'http://localhost:8080/',
+				target: process.env.NODE_ENV === 'production' ? 'https://flettex-backend.fly.dev' : 'http://localhost:8080/',
 				changeOrigin: true,
 				rewrite: path => path.replace(/^\/api/, '')
 			},
 			'/ws': {
-				target: 'ws://localhost:8080',
+				target: process.env.NODE_ENV === 'production' ? 'wss://flettex-backend.fly.dev' : 'ws://localhost:8080/',
 				changeOrigin: true,
 				ws: true,
 			}

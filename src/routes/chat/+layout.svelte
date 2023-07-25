@@ -373,9 +373,9 @@
       // const { location } = window;
 
       // await fetch("/api/samesite");
-      // const proto = location.protocol.startsWith("https") ? "wss" : "ws";
+      const proto = location.protocol.startsWith("https") ? "wss" : "ws";
       // const wsUri = "ws://localhost:8080/ws";
-      const wsUri = "ws://localhost:5173/ws";
+      const wsUri = proto ? "wss://flettex-backend.fly.dev/ws" : "ws://localhost:5173/ws";
       // const wsUri = "wss://flettex-backend.fly.dev/ws";
 
       log(sysmsg("Connecting...", $selectedGuild.id));
