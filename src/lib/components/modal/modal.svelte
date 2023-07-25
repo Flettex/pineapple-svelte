@@ -54,8 +54,14 @@
 <style lang="postcss">
   dialog {
     @apply p-0 opacity-0 rounded-lg -translate-y-3
-               transition-all duration-200;
+      transition-all duration-200
+      left-0 right-0 top-0 bottom-0 mt-auto mb-auto ml-auto mr-auto absolute;
   }
+
+  dialog > div {
+    /* @apply m-2; */
+  }
+
   dialog.open {
     @apply opacity-100 translate-y-0;
   }

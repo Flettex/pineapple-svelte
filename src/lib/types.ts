@@ -32,7 +32,8 @@ export interface IMember {
   nick_name: string | undefined;
   join_at: number;
   guild_id: string;
-  user_id: bigint;
+  user_id: number;
+  user: IUser;
 }
 
 export interface IGuild {

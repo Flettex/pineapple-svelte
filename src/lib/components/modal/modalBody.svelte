@@ -1,3 +1,3 @@
-<p class="text-sm text-center text-gray-500 mx-[7%] mb-5">
+<p class="text-sm text-gray-500 px-[7%] pb-5 {$$props.class}">
     <slot />
 </p>

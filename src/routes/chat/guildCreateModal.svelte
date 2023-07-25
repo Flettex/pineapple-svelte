@@ -5,6 +5,7 @@
     ModalActionButton,
     ModalActions,
     ModalTitle,
+    ModalBody
   } from "$lib/components/modal";
   import { encode } from "cbor-x";
   import {socket, selectedChannel} from "$lib/stores"
@@ -19,24 +20,30 @@
   let icon = "";
 </script>
 
-<Button on:click={() => (isModalOpen = true)}>Trigger Guild</Button>
+<!-- <Button on:click={() => (isModalOpen = true)}>Trigger Guild</Button> -->
+
+<button on:click={() => (isModalOpen = true)} class={$$props.class}>
+  <slot />
+</button>
 
 <Modal bind:isOpen={isModalOpen}>
   <ModalTitle>Create a server</ModalTitle>
 
-  <form>
-    <div class="p-1">
-      Name <input type="text" bind:value={name} />
-    </div>
+  <ModalBody>
+    <form>
+      <div class="p-1">
+        Name <input type="text" bind:value={name} />
+      </div>
 
-    <div class="p-1">
-      Description? <input type="text" bind:value={description} />
-    </div>
+      <div class="p-1">
+        Description? <input type="text" bind:value={description} />
+      </div>
 
-    <div class="p-1">
-      Icon? <input type="text" bind:value={icon} />
-    </div>
-  </form>
+      <div class="p-1">
+        Icon? <input type="text" bind:value={icon} />
+      </div>
+    </form>
+  </ModalBody>
   <ModalActions>
     <ModalActionButton on:click={() => (isModalOpen = false)} isDestructive
       >Close</ModalActionButton

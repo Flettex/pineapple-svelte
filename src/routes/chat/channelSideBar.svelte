@@ -1,6 +1,7 @@
 <script lang="ts">
   import { MAIN_CHANNEL } from "$lib/constants";
-  import { selectedChannel, selectedGuild } from "$lib/stores";
+  import { selectedChannel, selectedGuild, userData } from "$lib/stores";
+	import ChannelCreateModal from "./channelCreateModal.svelte";
   // let channels = $selectedGuild.channels;
   // userData.subscribe((userd) => {
   //   if (!userd) return;
@@ -10,21 +11,24 @@
   let toolTipState = "invisible";
 </script>
 
-<div class="w-40 h-auto m-0 ml-16 bg-[#F2F3F5] dark:bg-gray-800">
+<div class="w-60 h-full m-0 ml-16 bg-[#F2F3F5] dark:bg-gray-800">
   <div
-    class="w-full relative inline-block h-12 m-0 p-0 border box-shadow-property"
+    class="w-full relative flex h-12 m-0 p-0 border box-shadow-property justify-center items-center"
     on:focus={() => toolTipState = "visible"}
     on:blur={() => toolTipState = "invisible"}
     on:mouseover={() => toolTipState = "visible"}
     on:mouseout={() => toolTipState = "invisible"}
   >
     <h4 class="text-lg tracking-wider font-bold text-gray-600 dark:text-gray-400 mr-auto ml-4 align-middle">{$selectedGuild.name}</h4>
-    <span class={`${toolTipState} w-full bg-black text-white text-center rounded-md px-1 absolute z-10 top-[60%] left-[50%] -ml-[60px] tooltip-text`}>Tooltip</span>
+    <ChannelCreateModal log={() => {}}>
+      <img class="h-8 w-8 mr-2 mt-[-3%]" src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Plus_symbol.svg/500px-Plus_symbol.svg.png" alt="plus">
+    </ChannelCreateModal>
+    <span class={`${toolTipState} w-full bg-black text-white text-center rounded-md px-1 absolute z-10 top-[90%] left-[35%] -ml-[60px] tooltip-text`}>Tooltip</span>
   </div>
-  <div class="flex flex-col items-center justify-start p-1 m-0">
+  <div class="flex flex-col items-center justify-start p-1 m-0 h-[90%] overflow-y-auto">
     {#each $selectedGuild.channels || [] as c (c.id)}
       <button
-        class="channel-tab"
+        class="{$selectedChannel.id === c.id ? "channel-tab-selected" : "channel-tab"}"
         on:click={() => {
           selectedChannel.set(
             c ||
@@ -37,6 +41,12 @@
       </button>
     {/each}
   </div>
+  <div class="flex flex-row justify-start items-center h-[5%] bg-[#EBEDEF]">
+    <!-- Put user profile stuff here -->
+    <img class="w-[32px] h-[32px] inline-block ml-3 mr-2 rounded-full" src={$userData?.user.profile || "https://external-preview.redd.it/ZuElAifUXkduBrTSwRcwzZaLWRTTyd_EVma3pCKf8WI.jpg?auto=webp&s=ecc5612ca31cec7311eb12158622950fa6f44a9a"} alt="pfp">
+    <p>{$userData?.user.username}</p>
+    <img class="w-[48px] h-[48px] ml-auto rounded-full" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Settings_%28iOS%29.png/800px-Settings_%28iOS%29.png" alt="settings">
+  </div>
 </div>
 
 <style lang="postcss">
@@ -46,7 +56,12 @@
       transition duration-300 ease-in-out
       cursor-pointer; */
       @apply m-0 w-[98%] py-1 pl-3 text-left rounded-md
-      transition duration-300 ease-in-out bg-gray-200 text-gray-900 hover:bg-gray-300 flex flex-row;
+      transition duration-100 ease-in-out text-gray-900 hover:bg-gray-200 flex flex-row;
+  }
+
+  .channel-tab-selected {
+    @apply m-0 w-[98%] py-1 pl-3 text-left rounded-md
+      transition duration-300 ease-in-out text-gray-900 bg-gray-300 flex flex-row;
   }
 
   .box-shadow-property {

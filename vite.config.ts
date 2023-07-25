@@ -9,7 +9,6 @@ const config: UserConfig = {
 	// optimizeDeps: {
 		// disabled: true,
 	// },
-	host: 'localhost',
 	server: {
 		proxy: {
 			'/api': {

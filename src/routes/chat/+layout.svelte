@@ -21,18 +21,19 @@
     userData,
     fetched
   } from "$lib/stores";
-  import type { IGuild, IMessage } from "$lib/types";
-  import GuildCreateModal from "./guildCreateModal.svelte";
-	import { onMount } from "svelte";
+  import type { IGuild, IMessage, IMember } from "$lib/types";
+  // import GuildCreateModal from "./guildCreateModal.svelte";
+	import { onMount, tick } from "svelte";
 	import { goto } from "$app/navigation";
-	import ChannelCreateModal from "./channelCreateModal.svelte";
-	import JoinGuildModal from "./joinGuildModal.svelte";
+	// import ChannelCreateModal from "./channelCreateModal.svelte";
+	// import JoinGuildModal from "./joinGuildModal.svelte";
 
   let disconnecting: boolean = false;
 
   // let logRef;
   let statusRef: HTMLSpanElement;
-  let textInputRef: HTMLInputElement;
+  let textInputRef: HTMLTextAreaElement;
+  let ele: HTMLElement;
   // let nameRef;
 
   onMount(async () => {
@@ -242,15 +243,28 @@
             let found = newGuilds.findIndex(
               (g) => g.id === event.data.guild_id
             );
+            userCache.update((cache) => {
+              const data = {
+                ...cache
+              };
+              event.data.members.forEach((m: IMember) => {
+                data[m.user_id + ""] = m.user;
+              });
+              return data;
+            });
             if (found !== -1) {
               newGuilds[found] = {
                 ...newGuilds[found],
                 members: [
                   ...newGuilds[found].members,
-                  ...event.data.members.map((m: any) => ({
-                    ...m,
-                    user_id: BigInt(m.user_id),
-                  })),
+                  ...event.data.members.map((m: IMember) => {
+                    const { user, ...mWithoutUsers} = m;
+                    return ({
+                      // includes a User object
+                      ...mWithoutUsers,
+                      user_id: BigInt(m.user_id),
+                    });
+                  }),
                 ],
               };
             } else {
@@ -413,10 +427,46 @@
       ...$logs,
       [msg.channel_id]: [...($logs[msg.channel_id] ?? []), msg],
     });
+    // scroll to bottom message
+    tick().then(() => {
+      if (ele) ele.scroll({ top: ele.scrollHeight, behavior: 'smooth' });
+    });
+  }
+
+  function handleSubmit() {
+    if (!textInputRef || !$socket) return;
+
+    const text = textInputRef.value;
+
+    const nonce = uuid.v4();
+    console.log("sending message...");
+
+    log({
+      id: "NOT_RECEIVED",
+      content: text,
+      created_at: Date.now(),
+      edited_at: Date.now(),
+      author: $userData?.user || SYSTEM_AUTHOR,
+      channel_id: $selectedChannel.id,
+      nonce,
+    });
+    $socket.send(
+      encode({
+        type: "MessageCreate",
+        data: {
+          content: text,
+          channel_id: $selectedChannel.id,
+          nonce: uuid.parse(nonce),
+        },
+      })
+    );
+
+    textInputRef.value = "";
+    textInputRef.focus();
   }
 </script>
 
-<div class="flex gap-1">
+<div class="flex gap-1 h-full overflow-hidden">
   <GuildSideBar />
   <ChannelSideBar />
 
@@ -431,48 +481,39 @@
       <span bind:this={statusRef}>disconnected</span>
     </div>
 
-    <slot />
+    <section class="overflow-y-auto" bind:this={ele}>
+      <slot />
+    </section>
 
     <form
-      on:submit|preventDefault={() => {
-        if (!textInputRef || !$socket) return;
-
-        const text = textInputRef.value;
-
-        const nonce = uuid.v4();
-        console.log("sending message...");
-
-        log({
-          id: "NOT_RECEIVED",
-          content: text,
-          created_at: Date.now(),
-          edited_at: Date.now(),
-          author: $userData?.user || SYSTEM_AUTHOR,
-          channel_id: $selectedChannel.id,
-          nonce,
-        });
-        $socket.send(
-          encode({
-            type: "MessageCreate",
-            data: {
-              content: text,
-              channel_id: $selectedChannel.id,
-              nonce: uuid.parse(nonce),
-            },
-          })
-        );
-
-        textInputRef.value = "";
-        textInputRef.focus();
-      }}
+      on:submit|preventDefault={handleSubmit}
     >
-      <input type="text" bind:this={textInputRef} />
+      <textarea class="
+        caret-black w-[90%]
+        h-12
+        bg-gray-100
+        border
+        border-gray-300
+        rounded
+        p-4
+        text-lg
+        resize-y
+        focus:outline-none
+        focus:border-blue-500"
+        bind:this={textInputRef}
+        on:keydown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleSubmit();
+          }
+        }}
+      />
       <Button type="submit">Submit</Button>
     </form>
 
-    <GuildCreateModal {log} />
-    <ChannelCreateModal {log} />
-    <JoinGuildModal {log} />
+    <!-- <GuildCreateModal {log} /> -->
+    <!-- <ChannelCreateModal {log} /> -->
+    <!-- <JoinGuildModal {log} /> -->
 
     <hr />
   </div>

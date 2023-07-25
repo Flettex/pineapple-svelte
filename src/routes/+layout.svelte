@@ -32,7 +32,7 @@
 </script>
 
 <RouteLoading />
-<main class="min-h-screen">
+<main class="min-h-screen h-full">
   <slot />
 </main>
 

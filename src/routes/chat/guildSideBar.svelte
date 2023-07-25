@@ -2,9 +2,10 @@
   import { MAIN_CHANNEL, MAIN_GUILD } from "$lib/constants";
   import { selectedChannel, selectedGuild, userData } from "$lib/stores";
 	import { createToast } from "$lib/utils";
+	import GuildModal from "./guildModal.svelte";
 </script>
 
-<div class="fixed top-0 left-0 h-screen w-16 flex flex-col bg-[#E3E5E8] dark:bg-gray-900 shadow-lg">
+<div class="fixed top-0 left-0 h-full w-16 flex flex-col bg-[#E3E5E8] dark:bg-gray-900 shadow-lg">
   <button
     class="guild-tab"
     on:click={() => createToast({ message: "Dms are not available yet", type: "info" })}
@@ -38,6 +39,9 @@
       {/if}
     </button>
   {/each}
+  <GuildModal>
+    <img class="guild-tab" src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Plus_symbol.svg/500px-Plus_symbol.svg.png" alt="plus">
+  </GuildModal>
 </div>
 
 <style lang="postcss">
