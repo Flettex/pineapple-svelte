@@ -31,7 +31,7 @@
       credentials: "include",
     }).then((res) => {
       if (res.ok) {
-        goto("/chat");
+        goto("/chat/5fe9d2ab-2174-4a30-8245-cc5de2563dce/5fe9d2ab-2174-4a30-8245-cc5de2563dce");
       }
     });
   }}
