@@ -2,7 +2,7 @@ import { MAIN_GUILD } from "$lib/constants";
 import type { LayoutServerLoad } from "./$types";
 
 export const load: LayoutServerLoad = async (req) => {
-  console.log(req.params.guildId, MAIN_GUILD.id);
+  console.log(req.params);
   if (req.params.guildId === MAIN_GUILD.id) {
     return { guild: MAIN_GUILD };
   }
