@@ -1,5 +1,5 @@
 {
-    "rewrites": [
+    "redirects": [
         { "source": "/api/:path(.*)", "destination": "https://flettex-backend.fly.dev/:path" }
     ]
 }
