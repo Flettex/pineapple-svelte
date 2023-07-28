@@ -32,8 +32,11 @@
         </div>
       {:else}
         <div class="flex flex-row my-4">
-          <span class="w-8 h-8 bg-gray-300 rounded-md animate-pulse" />
-          <section class="before:content-[''] before:inline-block before:w-0 bg-gray-300 animate-pulse" />
+          <span class="w-8 h-8 inline-block m-2 bg-gray-300 rounded-md animate-pulse" />
+          <section class="w-full flex flex-col p-2">
+            <p class="mb-1 w-full h-[14px] before:content-[''] before:inline-block before:w-0 bg-gray-300 animate-pulse rounded-md" />
+            <p class="w-full h-[14px] before:content-[''] before:inline-block before:w-0 bg-gray-300 animate-pulse rounded-md" />
+          </section>
         </div>
       {/if}
     {/each}
@@ -74,8 +77,11 @@
         </div>
       {:else}
         <div class="flex flex-row my-4">
-          <span class="w-8 h-8 bg-gray-300 rounded-md animate-pulse" />
-          <section class="before:content-[''] before:inline-block before:w-0  bg-gray-300 animate-pulse" />
+          <span class="w-8 h-8 inline-block m-2 bg-gray-300 rounded-md animate-pulse" />
+          <section class="w-full flex flex-col p-2">
+            <p class="mb-1 w-full h-[14px] before:content-[''] before:inline-block before:w-0 bg-gray-300 animate-pulse rounded-md" />
+            <p class="w-full h-[14px] before:content-[''] before:inline-block before:w-0 bg-gray-300 animate-pulse rounded-md" />
+          </section>
         </div>
       {/if}
     {/each}
