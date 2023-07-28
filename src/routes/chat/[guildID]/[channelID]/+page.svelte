@@ -43,7 +43,7 @@
             return;
           const inp = prompt("New content");
           if (!inp) return;
-          $socket?.sendQueued(
+          $socket?.send(
             encode({
               type: "MessageUpdate",
               data: {

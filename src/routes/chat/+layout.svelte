@@ -42,11 +42,11 @@
   onMount(async () => {
     await connect();
     selectedGuild.subscribe(({ id }) => {
-      goto(`/chat/${id}/${$selectedChannel.id}`)
+      goto(`/chat/${id}/${$selectedChannel.id}`);
     });
 
     selectedChannel.subscribe(({ id }) => {
-      goto(`/chat/${$selectedGuild.id}/${id}`)
+      goto(`/chat/${$selectedGuild.id}/${id}`);
     });
   });
 
@@ -64,6 +64,25 @@
         fetched.update((fetched) => ({
           ...fetched,
           channels: [...fetched.channels, $selectedChannel.id]
+        }));
+      }
+    }
+  }
+  $: {
+    if ($selectedGuild.id !== MAIN_GUILD.id) {
+      if (!$fetched.guilds.includes($selectedGuild.id) && $socket) {
+        // console.log("Fetching members for guild", $selectedGuild.id, $selectedGuild.name)
+        $socket.sendQueued(
+          encode({
+            type: "MemberFetch",
+            data: {
+              guild_id: uuid.parse($selectedGuild.id),
+            },
+          })
+        );
+        fetched.update((fetched) => ({
+          ...fetched,
+          guilds: [...fetched.guilds, $selectedGuild.id]
         }));
       }
     }
@@ -317,47 +336,6 @@
     }
   });
 
-  socket.subscribe((sock) => {
-    if (sock) {
-      if ($selectedChannel.id == MAIN_CHANNEL.id) return;
-      if (!$fetched.channels.includes($selectedChannel.id)) {
-        sock.sendQueued(
-          encode({
-            type: "MessageFetch",
-            data: {
-              channel_id: uuid.parse($selectedChannel.id),
-            },
-          })
-        );
-        fetched.update((fetched) => ({
-          ...fetched,
-          channels: [...fetched.channels, $selectedChannel.id]
-        }));
-      }
-    }
-  });
-
-  socket.subscribe((sock) => {
-    if (sock) {
-      if ($selectedGuild.id == MAIN_GUILD.id) return;
-      if (!$fetched.guilds.includes($selectedGuild.id)) {
-        console.log("Fetching members for guild", $selectedGuild.id, $selectedGuild.name)
-        sock.sendQueued(
-          encode({
-            type: "MemberFetch",
-            data: {
-              guild_id: uuid.parse($selectedGuild.id),
-            },
-          })
-        );
-        fetched.update((fetched) => ({
-          ...fetched,
-          guilds: [...fetched.guilds, $selectedGuild.id]
-        }));
-      }
-    }
-  });
-
   async function connect() {
     if ($socket) {
       if (disconnecting) {
@@ -383,6 +361,39 @@
       websocket.onopen = () => {
         log(sysmsg("Connected", $selectedChannel.id));
         queue.forEach((d) => websocket.send(d));
+        if ($selectedChannel.id !== MAIN_CHANNEL.id) {
+          if (!$fetched.channels.includes($selectedChannel.id)) {
+            websocket.send(
+              encode({
+                type: "MessageFetch",
+                data: {
+                  channel_id: uuid.parse($selectedChannel.id),
+                },
+              })
+            );
+            fetched.update((fetched) => ({
+              ...fetched,
+              channels: [...fetched.channels, $selectedChannel.id]
+            }));
+          }
+        }
+        if ($selectedGuild.id !== MAIN_GUILD.id) {
+          if (!$fetched.guilds.includes($selectedGuild.id)) {
+            // console.log("Fetching members for guild", $selectedGuild.id, $selectedGuild.name)
+            websocket.sendQueued(
+              encode({
+                type: "MemberFetch",
+                data: {
+                  guild_id: uuid.parse($selectedGuild.id),
+                },
+              })
+            );
+            fetched.update((fetched) => ({
+              ...fetched,
+              guilds: [...fetched.guilds, $selectedGuild.id]
+            }));
+          }
+        }
       };
       websocket.sendQueued = (data: string | ArrayBufferLike | Blob | ArrayBufferView) => {
         if (websocket.readyState === 1) {
