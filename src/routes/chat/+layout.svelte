@@ -341,6 +341,7 @@
     if (sock) {
       if ($selectedGuild.id == MAIN_GUILD.id) return;
       if (!$fetched.guilds.includes($selectedGuild.id)) {
+        console.log("Fetching members for guild", $selectedGuild.id, $selectedGuild.name)
         sock.sendQueued(
           encode({
             type: "MemberFetch",

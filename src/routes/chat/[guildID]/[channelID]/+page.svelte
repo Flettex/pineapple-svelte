@@ -11,6 +11,7 @@
   // $: selectedChannel.update(_ => data.channel);
   $: msgs = $logs[$selectedChannel.id] || [];
   $: console.log("messages", msgs, $logs)
+  $: console.log($userCache);
 </script>
 
 {#if $userData && $userData.user.id}
@@ -42,7 +43,7 @@
             return;
           const inp = prompt("New content");
           if (!inp) return;
-          $socket?.send(
+          $socket?.sendQueued(
             encode({
               type: "MessageUpdate",
               data: {
