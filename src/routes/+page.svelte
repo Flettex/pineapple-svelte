@@ -16,6 +16,7 @@
   }
 
   darkMode.subscribe((d) => {
+    if (typeof window === 'undefined') return;
     localStorage.setItem('theme', d ? 'dark' : 'light');
 
     d
