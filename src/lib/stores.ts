@@ -14,6 +14,8 @@ interface WS extends WebSocket {
   sendQueued: (data: string | ArrayBufferLike | Blob | ArrayBufferView) => void
 }
 
+export const darkMode = writable<boolean | null>(null);
+
 export const socket = writable<WS | null>(null);
 
 export const toastStore = writable<IToast[]>([]);

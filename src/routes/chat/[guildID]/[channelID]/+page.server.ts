@@ -8,7 +8,7 @@ export const load: PageServerLoad = async (req) => {
   }
   const resp = await fetch(`${req.url.protocol}//${req.url.host}/api/channels/${req.params.channelID}`);
   // console.log("\n\nResponse: \n\n", await resp.text());
-  console.log(resp);
+  // console.log(resp);
   return {
     channel: await resp.json()
   };

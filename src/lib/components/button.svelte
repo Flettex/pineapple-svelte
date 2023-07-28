@@ -20,6 +20,7 @@
 <!-- </div> -->
 <style lang="postcss">
   button {
+    @apply text-black dark:text-[#f3f4f6];
     padding-top: 0.1em;
     padding-bottom: 0.2em;
     padding-left: 0.9em;
@@ -30,11 +31,13 @@
   }
 
   button.enabled {
+    @apply dark:bg-[#23272A];
     background-color: white;
     border: 1px solid lightgray;
     box-shadow: 0 0 0.5px lightgray;
   }
   button.enabled:active {
+    @apply dark:bg-[#2C2F33];
     background-color: rgb(246, 246, 246);
     border: 1px solid gray;
   }
@@ -44,6 +47,7 @@
     border: 1px solid transparent;
     box-shadow: 0 0 1px #ffffff;
   }
+  
   button.disabled:active {
     background-color: rgb(246, 246, 246);
     border: 1px solid lightgray;

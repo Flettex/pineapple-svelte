@@ -5,7 +5,7 @@
 	import GuildModal from "./guildModal.svelte";
 </script>
 
-<div class="fixed top-0 left-0 h-full w-16 flex flex-col bg-[#E3E5E8] dark:bg-gray-900 shadow-lg">
+<div class="fixed top-0 left-0 h-full w-16 flex flex-col bg-[#E3E5E8] dark:bg-[#0c0c0d] shadow-lg">
   <button
     class="guild-tab"
     on:click={() => createToast({ message: "Dms are not available yet", type: "info" })}
@@ -48,8 +48,8 @@
     .guild-tab {
       @apply relative flex items-center justify-center 
       h-12 w-12 mt-2 mb-2 mx-auto  
-    bg-white hover:bg-blue-600 dark:bg-gray-800 
-    text-black hover:text-white
+    bg-white hover:bg-[#5865F2] dark:bg-gray-800 dark:hover:bg-[#5865F2]
+    text-black hover:text-white dark:text-white dark:hover:text-black
       hover:rounded-xl rounded-3xl
       transition-all duration-300 ease-linear
       cursor-pointer shadow-sm;

@@ -11,7 +11,7 @@
   let toolTipState = "invisible";
 </script>
 
-<div class="w-60 h-full m-0 ml-16 bg-[#F2F3F5] dark:bg-gray-800">
+<div class="w-60 h-full m-0 ml-16 bg-[#F2F3F5] dark:bg-[#2b2d31]">
   <div
     class="w-full relative flex h-12 m-0 p-0 border box-shadow-property justify-center items-center"
     on:focus={() => toolTipState = "visible"}
@@ -56,12 +56,18 @@
       transition duration-300 ease-in-out
       cursor-pointer; */
       @apply m-0 w-[98%] py-1 pl-3 text-left rounded-md
-      transition duration-100 ease-in-out text-gray-900 hover:bg-gray-200 flex flex-row;
+      transition duration-100 ease-in-out
+      text-gray-900 dark:text-white
+      hover:bg-gray-200 dark:hover:bg-[#343639]
+      flex flex-row;
   }
 
   .channel-tab-selected {
     @apply m-0 w-[98%] py-1 pl-3 text-left rounded-md
-      transition duration-300 ease-in-out text-gray-900 bg-gray-300 flex flex-row;
+      transition duration-300 ease-in-out
+      text-gray-900 dark:text-white
+      bg-gray-300 dark:bg-[#4d4f56]
+      flex flex-row;
   }
 
   .box-shadow-property {

@@ -22,19 +22,22 @@
     fetched
   } from "$lib/stores";
   import type { IGuild, IMessage, IMember } from "$lib/types";
-  // import GuildCreateModal from "./guildCreateModal.svelte";
 	import { onMount, tick } from "svelte";
 	import { goto } from "$app/navigation";
-	// import ChannelCreateModal from "./channelCreateModal.svelte";
-	// import JoinGuildModal from "./joinGuildModal.svelte";
 
   let disconnecting: boolean = false;
 
-  // let logRef;
   let statusRef: HTMLSpanElement;
   let textInputRef: HTMLTextAreaElement;
   let ele: HTMLElement;
-  // let nameRef;
+
+  selectedChannel.subscribe(async _ => {
+    // scroll to bottom once channel is changed
+    // will change when "read" is implemented
+    await tick();
+    if (!ele) return;
+    ele.scroll({ top: ele.scrollHeight });
+  });
 
   onMount(async () => {
     await connect();
@@ -354,12 +357,6 @@
     }
   });
 
-  // $: {
-  //   if (logRef) {
-  //     logRef.scrollTop += 1000;
-  //   }
-  // }
-
   async function connect() {
     if ($socket) {
       if (disconnecting) {
@@ -470,8 +467,8 @@
   <GuildSideBar />
   <ChannelSideBar />
 
-  <div class="flex flex-col bg-gray-300 dark:bg-gray-700 m-0 h-full w-full overflow-hidden">
-    <div>
+  <div class="flex flex-col bg-gray-300 dark:bg-[#4f5159] m-0 h-full w-full overflow-hidden">
+    <section class="text-black dark:text-[#f3f4f6] border-black border-2 dark:border-white">
       <Button on:click={connect}>
         {$socket ? "Disconnect" : "Connect"}
       </Button>
@@ -479,13 +476,14 @@
       <div>CHANNEL: {$selectedChannel.name} {$selectedChannel.id}</div>
       <span>Status:</span>
       <span bind:this={statusRef}>disconnected</span>
-    </div>
+    </section>
 
     <section class="overflow-y-auto" bind:this={ele}>
       <slot />
     </section>
 
     <form
+      class="mt-auto"
       on:submit|preventDefault={handleSubmit}
     >
       <textarea class="
@@ -495,9 +493,9 @@
         border
         border-gray-300
         rounded
-        p-4
+        p-2
         text-lg
-        resize-y
+        resize-none
         focus:outline-none
         focus:border-blue-500"
         bind:this={textInputRef}

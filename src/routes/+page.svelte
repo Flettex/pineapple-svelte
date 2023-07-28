@@ -1,11 +1,27 @@
 <script lang="ts">
   import Button from "$lib/components/button.svelte";
-	import ButtonGroup from "$lib/components/buttonGroup.svelte";
+  import ButtonGroup from "$lib/components/buttonGroup.svelte";
 
   import * as Modals from "$lib/components/modal";
   import { createToast } from "$lib/utils";
 
   let isOpen = false;
+
+  import { darkMode } from "$lib/stores";
+
+  function handleSwitchDarkMode() {
+    if ($darkMode === null) return;
+    // console.log("Setting darkmode to", !$darkMode)
+    darkMode.set(!$darkMode);
+  }
+
+  darkMode.subscribe((d) => {
+    localStorage.setItem('theme', d ? 'dark' : 'light');
+
+    d
+        ? document.documentElement.classList.add('dark')
+        : document.documentElement.classList.remove('dark');
+  })
 </script>
 
 <h1 class="text-2xl">
@@ -34,6 +50,8 @@
   <Button>2</Button>
   <Button>3</Button>
 </ButtonGroup>
+
+<Button on:click={handleSwitchDarkMode}>Toggle light/dark mode</Button>
 
 <Modals.Modal bind:isOpen>
   <Modals.ModalTitle>Title</Modals.ModalTitle>

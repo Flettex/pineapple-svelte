@@ -8,7 +8,7 @@ export const load: LayoutServerLoad = async (req) => {
   }
   const resp = await fetch(`${req.url.protocol}//${req.url.host}/api/guilds/${req.params.guildID}`);
   // console.log("\n\nResponse: \n\n", JSON.parse(await resp.text()));
-  console.log(resp);
+  // console.log(resp);
   return {
     guild: await resp.json()
   };
