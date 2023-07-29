@@ -7,6 +7,7 @@
   import * as uuid from "uuid";
 
   import {
+	DM_GUILD,
     MAIN_CHANNEL,
     MAIN_GUILD,
     sysmsg,
@@ -41,11 +42,18 @@
 
   onMount(async () => {
     await connect();
-    selectedGuild.subscribe(({ id }) => {
-      goto(`/chat/${id}/${$selectedChannel.id}`);
+    selectedGuild.subscribe((g) => {
+      if (g?.id === DM_GUILD.id) return;
+      goto(`/chat/${g?.id}/${$selectedChannel.id}`);
     });
 
-    selectedChannel.subscribe(({ id }) => {
+    selectedChannel.subscribe(({ id, channel_type }) => {
+      // alert(`${id}\n${channel_type}`)
+      if (channel_type === 1) {
+        // alert("ok");
+        goto(`/chat/@me/${id}`);
+        return;
+      }
       goto(`/chat/${$selectedGuild.id}/${id}`);
     });
   });
@@ -69,7 +77,7 @@
     }
   }
   $: {
-    if ($selectedGuild.id !== MAIN_GUILD.id) {
+    if ($selectedGuild.id !== MAIN_GUILD.id && $selectedGuild.id !== DM_GUILD.id) {
       if (!$fetched.guilds.includes($selectedGuild.id) && $socket) {
         // console.log("Fetching members for guild", $selectedGuild.id, $selectedGuild.name)
         $socket.sendQueued(
@@ -137,7 +145,7 @@
                   ...newGuilds[found].members,
                   {
                     ...event.data.member,
-                    user_id: BigInt(event.data.member.user_id),
+                    user_id: BigInt(event.data.member.id),
                   },
                 ],
               };
@@ -150,6 +158,7 @@
             return {
               user: usrd.user,
               guilds: newGuilds,
+              dms: [...usrd.dms]
             };
           });
         } else if (event.type === "MemberRemove") {
@@ -203,8 +212,21 @@
                 members: event.data.guild.members ?? [],
               },
             ],
+            dms: [...usrd!.dms]
           }));
         } else if (event.type === "ChannelCreate") {
+          if (event.data.channel.channel_type === 1) {
+            userData.update((usrd) => {
+              return {
+                ...usrd!,
+                dms: [...usrd!.dms, event.data.channel]
+              };
+            });
+            selectedGuild.set(DM_GUILD);
+            selectedChannel.set(event.data.channel);
+            goto(`/chat/@me/${event.data.channel.id}`)
+            return;
+          }
           userData.update((usrd) => ({
             user: usrd!.user,
             guilds: [...(usrd!.guilds as IGuild[])].map((g) =>
@@ -217,6 +239,7 @@
                     ...g,
                   }
             ),
+            dms: [...usrd!.dms]
           }));
         } else if (event.type === "ReadyEvent") {
           userData.set({
@@ -231,6 +254,7 @@
                 members: [],
               };
             }),
+            dms: []
           });
           userCache.update((cache) => ({
             ...cache,
@@ -290,6 +314,7 @@
                 ],
               };
             } else {
+              console.log("Bro wtf", event.data);
               throw new Error(
                 "Bro wtf receiving members event before the guild initialized dude what"
               );
@@ -297,6 +322,7 @@
             return {
               user: usrd!.user,
               guilds: [...(usrd!.guilds as IGuild[])],
+              dms: [...usrd!.dms]
             };
           });
         } else if (event.type === "UserFetch") {
@@ -377,7 +403,7 @@
             }));
           }
         }
-        if ($selectedGuild.id !== MAIN_GUILD.id) {
+        if ($selectedGuild.id !== MAIN_GUILD.id && $selectedGuild.id !== DM_GUILD.id) {
           if (!$fetched.guilds.includes($selectedGuild.id)) {
             // console.log("Fetching members for guild", $selectedGuild.id, $selectedGuild.name)
             websocket.sendQueued(
@@ -407,11 +433,11 @@
   }
 
   function try_user(id: bigint) {
-    if ($userCache.hasOwnProperty(id + "")) return;
-    if ($fetched.users.includes(id)) return;
-    ((cache) => {
+    // if ($userCache.hasOwnProperty(id + "")) return;
+    // if ($fetched.users.includes(id)) return;
+    // ((cache) => {
       if (
-        cache.hasOwnProperty(id + "") &&
+        // cache.hasOwnProperty(id + "") &&
         !$userCache.hasOwnProperty(id + "") &&
         !$fetched.users.includes(id)
       ) {
@@ -419,7 +445,7 @@
           ...fetched,
           users: [...fetched.users, id]
         }));
-        $socket?.send(
+        $socket?.sendQueued(
           encode({
             type: "UserFetch",
             data: {
@@ -428,7 +454,7 @@
           })
         );
       }
-    })(userCache);
+    // })($userCache);
   }
 
   function log(msg: IMessage): void {

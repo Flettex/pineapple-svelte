@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { MAIN_CHANNEL, MAIN_GUILD } from "$lib/constants";
+  import { DM_GUILD, MAIN_CHANNEL, MAIN_GUILD } from "$lib/constants";
   import { selectedChannel, selectedGuild, userData } from "$lib/stores";
-	import { createToast } from "$lib/utils";
+	// import { createToast } from "$lib/utils";
 	import GuildModal from "./guildModal.svelte";
 </script>
 
 <div class="fixed top-0 left-0 h-full w-16 flex flex-col bg-[#E3E5E8] dark:bg-[#0c0c0d] shadow-lg">
   <button
     class="guild-tab"
-    on:click={() => createToast({ message: "Dms are not available yet", type: "info" })}
+    on:click={() => selectedGuild.set(DM_GUILD)}
   >Dms</button>
 
   <hr class="guild-tab-hr">

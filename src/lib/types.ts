@@ -14,7 +14,10 @@ export interface IChannel {
   description?: string;
   position: number;
   created_at: number; // number
-  guild_id: string; // uuid, useless but too lazy to remove it
+  guild_id?: string; // uuid, useless but too lazy to remove it
+  channel_type: number,
+  user1?: bigint,
+  user2?: bigint
 }
 
 export interface IUser {
@@ -60,4 +63,5 @@ export interface IUserData {
     is_superuser: boolean;
   };
   guilds: IGuild[];
+  dms: IChannel[]
 }
